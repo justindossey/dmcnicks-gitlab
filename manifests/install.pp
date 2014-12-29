@@ -81,7 +81,10 @@ class gitlab::install (
 
   # Create the gitlab.rb file.
 
-  $http_scheme = $ssl ? { true  => 'https', false => 'http' }
+  $http_scheme = str2bool($ssl) ? {
+    true  => 'https',
+    false => 'http'
+  }
 
   file { '/etc/gitlab/gitlab.rb':
     ensure  => 'present',
