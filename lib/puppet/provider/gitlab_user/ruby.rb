@@ -50,7 +50,7 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
   end
 
   def password=(value)
-    set(:password, value)
+    @property_hash[:password] = value
   end
 
   # Allow email address to be set.
@@ -60,7 +60,7 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
   end
 
   def email=(value)
-    set(:email, value)
+    @property_hash[:email] = value
   end
 
   # Allow full name to be set.
@@ -70,7 +70,18 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
   end
 
   def fullname=(value)
-    set(:name, value)
+    @property_hash[:fullname] = value
+  end
+
+  # Flush method for pushing property value changes.
+
+  def flush
+    token = login
+    @property_hash[:private_token] = token
+    uri = '/users/' + user_id(resource[:username], token)
+    RestClient.put(resource[:api_url] + uri, @property_hash)
+  end
+
   end
 
   # Internal methods.
