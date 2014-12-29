@@ -15,7 +15,7 @@ class gitlab::params () {
 
   $default_password = '5iveL!fe'
   $api_login = 'root'
-  $api_url = "https://${::fqdn}/api/v3"
+  $api_url = "http://${::fqdn}/api/v3"
 
   $installer_file = $::operatingsystem ? {
     'Debian' => "/tmp/gitlab-debian${::operatingsystemmajrelease}.deb",
