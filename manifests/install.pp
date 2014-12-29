@@ -17,6 +17,9 @@
 # [*worker_processes*]
 #   The number of worker processes that Gitlab should run.
 #
+# [*gitlab_url*]
+#   The eventual URL of Gitlab.
+#
 # [*ssl*]
 #   True if SSL should be enabled.
 #
@@ -34,15 +37,9 @@ class gitlab::install (
   $installer_path,
   $installer_cmd,
   $worker_processes,
-  $ssl = false
+  $gitlab_url,
+  $ssl
 ) {
-
-  # Work out whether to use http or https.
-
-  $http_scheme = str2bool($ssl) ? {
-    true  => 'https',
-    false => 'http'
-  }
 
   # Create a certificate if SSL is enabled.
 

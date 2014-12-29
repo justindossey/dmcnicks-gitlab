@@ -32,9 +32,6 @@
 # [*api_password*]
 #   The password for the admin user.
 #
-# [*api_url*]
-#   The URL of the Gitlab API.
-#
 # === Authors
 #
 # David McNicol <david@mcnicks.org>
@@ -53,28 +50,39 @@ class gitlab (
   $ssl = $gitlab::params::ssl,
   $worker_processes = $gitlab::params::worker_processes,
   $default_password = $gitlab::params::default_password,
-  $api_login = $gitlab::params::api_login,
-  $api_url = $gitlab::params::api_url
+  $api_login = $gitlab::params::api_login
 ) inherits gitlab::params {
   
-  # Install Gitlab.
+  # Work out what the Gitlab URL will be.
+
+  $http_scheme = str2bool($ssl) ? {
+    true  => 'https',
+    false => 'http'
+  }
+
+  $gitlab_url = "${http_scheme}://${::fqdn}"
+
+  # Work out where the installer should be downloaded to.
 
   $installer_path = "${installer_dir}/${installer_file}"
+
+  # Install Gitlab.
 
   class { 'gitlab::install':
     download_url     => $download_url,
     installer_path   => $installer_path,
     installer_cmd    => $installer_cmd,
     worker_processes => $worker_processes,
+    gitlab_url       => $gitlab_url,
     ssl              => $ssl
   } ->
 
   # Configure Gitlab.
 
   class { 'gitlab::config':
+    gitlab_url       => $gitlab_url,
     default_password => $default_password,
     api_login        => $api_login,
-    api_password     => $api_password,
-    api_url          => $api_url
+    api_password     => $api_password
   }
 }

@@ -1,4 +1,4 @@
-external_url '<%= @http_scheme %>://<%= @fqdn %>'
+external_url '<%= @gitlab_url %>'
 nginx['redirect_http_to_https'] = <%= @ssl %>
 nginx['redirect_http_to_https_port'] = 80
 nginx['ssl_certificate'] = "/etc/gitlab/ssl/<%= @fqdn %>.crt"
