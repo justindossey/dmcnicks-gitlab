@@ -17,7 +17,7 @@
 #
 
 define gitlab::keygen (
-  $homedir = "/home/${name}",
+  $homedir = "/home/${title}",
   $comment = "${name}@${::fqdn}",
   $type = 'rsa',
   $bits = '2048'
@@ -28,40 +28,14 @@ define gitlab::keygen (
 
   file { $ssh_dir:
     ensure => 'directory',
-    owner => ${name},
+    owner => $title,
     mode => '0600'
   } ->
 
-  exec { "keygen-${name}":
+  exec { "keygen-${title}":
     path    => [ "/bin", "/usr/bin" ],
     command => "ssh-keygen -t ${type} -b ${bits} -N '' -C ${comment} -f \"${file}\"",
-    user    => ${name},
+    user    => ${title},
     creates => $file
-  }
-}
-
-
-  # Get the root user's public key.
-
-  $pubkey = gitlab_get_pubkey('root')
-
-  # Fix the default password.
-
-  gitlab_user_password { $api_login:
-    password     => $api_password,
-    api_login    => $api_login,
-    api_password => $default_password,
-    api_url      => $api_url
-  } ->
-
-  # Associate the root user public key with the Gitlab admin user.
-
-  gitlab_user_key { 'admin-pubkey':
-    ensure       => 'present',
-    username     => 'root',
-    key          => $pubkey,
-    api_login    => $api_login,
-    api_password => $default_password,
-    api_url      => $api_url
   }
 }
