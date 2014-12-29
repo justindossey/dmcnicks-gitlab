@@ -43,7 +43,9 @@ class gitlab::config (
 
   # Generate an SSH keypair for the root user if one does not exist.
 
-  gitlab::keygen { 'root': } ->
+  gitlab::keygen { 'root':
+    homedir => '/root'
+  } ->
 
   # Associate the root user public key with the Gitlab admin user.
 
