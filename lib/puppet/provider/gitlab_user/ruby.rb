@@ -35,18 +35,18 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
     params = {
       :private_token => token
     }
-    uri = '/users/' + user_id(resource[:username], token)
+    uri = '/users/' + user(token)['id']
     RestClient.delete(resource[:api_url] + uri, params)
   end
 
   def exists?
-    return user_id(resource[:username])
+    return user != nil
   end
 
   # Allow password to be set.
 
   def password
-    get['password']
+    user['password']
   end
 
   def password=(value)
@@ -56,7 +56,7 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
   # Allow email address to be set.
 
   def email
-    get['email']
+    user['email']
   end
 
   def email=(value)
@@ -66,25 +66,14 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
   # Allow full name to be set.
 
   def fullname
-    get['name']
+    user['name']
   end
 
   def fullname=(value)
     @property_hash[:fullname] = value
   end
 
-  # Flush method for pushing property value changes.
-
-  def flush
-    token = login
-    @property_hash[:private_token] = token
-    uri = '/users/' + user_id(resource[:username], token)
-    RestClient.put(resource[:api_url] + uri, @property_hash)
-  end
-
-  end
-
-  # Internal methods.
+  # Perform a login and return a session token.
   
   def login
     params = {
@@ -101,7 +90,9 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
     end
   end
     
-  def get(token = nil)
+  # Retrieve the user record.
+ 
+  def user(token = nil)
     token = token ? token : login
     params = {
       :private_token => token
@@ -119,34 +110,13 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
     end
   end
 
-  def set(name, value, token = nil)
-    token = token ? token : login
-    params = {
-      name => value,
-      :private_token => token
-    }
-    uri = '/users/' + user_id(resource[:username], token)
-    RestClient.put(resource[:api_url] + uri, params)
-  end
+  # Flush any property changes.
 
-  def user_id(username, token = nil)
-    token = token ? token : login
-    params = {
-      :private_token => token
-    }
-    uri = '/users'
-    response = RestClient.get(resource[:api_url] + uri, params)
-    if response.code == 200
-      users = JSON.parse(response)
-      users.each do |user|
-        if user['username'] == username
-          return user['id'].to_s
-        end
-      end
-      return nil
-    else
-      return nil
-    end
+  def flush
+    token = login
+    @property_hash[:private_token] = token
+    uri = '/users/' + user(token)['id']
+    RestClient.put(resource[:api_url] + uri, @property_hash)
   end
 
 end
