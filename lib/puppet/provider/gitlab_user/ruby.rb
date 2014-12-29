@@ -23,22 +23,22 @@ Puppet::Type.type(:gitlab_user).provide(
 
   def create
     params = {
-      :private_token => self.token,
+      :private_token => Puppet::Provider::Gitlab.token,
       :username      => resource[:username],
       :password      => resource[:password],
       :email         => resource[:email],
       :name          => resource[:fullname]
     }
     uri = '/users'
-    RestClient.post(self.api_url + uri, params)
+    RestClient.post(Puppet::Provider::Gitlab.api_url + uri, params)
   end
 
   def destroy
     params = {
-      :private_token => self.token
+      :private_token => Puppet::Provider::Gitlab.token
     }
     uri = '/users/%s' % user['id']
-    RestClient.delete(self.api_url + uri, params)
+    RestClient.delete(Puppet::Provider::Gitlab.api_url + uri, params)
   end
 
   def exists?
@@ -74,19 +74,19 @@ Puppet::Type.type(:gitlab_user).provide(
   # Flush properties that have been set.
 
   def flush
-    @property_hash[:private_token] = self.token
+    @property_hash[:private_token] = Puppet::Provider::Gitlab.token
     uri = '/users/%s' % user['id']
-    RestClient.put(self.api_url + uri, @property_hash)
+    RestClient.put(Puppet::Provider::Gitlab.api_url + uri, @property_hash)
   end
 
   # Retrieve the user record.
  
   def user
     params = {
-      :private_token => self.token
+      :private_token => Puppet::Provider::Gitlab.token
     }
     uri = '/users'
-    response = RestClient.get(self.api_url + uri, params)
+    response = RestClient.get(Puppet::Provider::Gitlab.api_url + uri, params)
     if response.code == 200
       users = JSON.parse(response)
       users.each do |user|
