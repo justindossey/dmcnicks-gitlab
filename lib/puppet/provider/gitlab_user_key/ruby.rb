@@ -1,3 +1,6 @@
+require 'puppet/provider/gitlab'
+require 'json'
+
 Puppet::Type.type(:gitlab_user_key).provide(
   :ruby,
   :parent => Puppet::Type.type(:gitlab_session).provider(:ruby)
