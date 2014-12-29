@@ -43,17 +43,7 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
     return user != nil
   end
 
-  # Allow password to be set.
-
-  def password
-    user['password']
-  end
-
-  def password=(value)
-    @property_hash[:password] = value
-  end
-
-  # Allow email address to be set.
+  # Getters and setters.
 
   def email
     user['email']
@@ -63,8 +53,6 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
     @property_hash[:email] = value
   end
 
-  # Allow full name to be set.
-
   def fullname
     user['name']
   end
@@ -73,12 +61,33 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
     @property_hash[:fullname] = value
   end
 
+  def password
+    user['password']
+  end
+
+  def password=(value)
+    @property_hash[:password] = value
+  end
+
   # Perform a login and return a session token.
   
   def login
+    # If the password of the api_login user is being set we have to
+    # do something clever here.
+    if ( resource[:username] == resource[:api_login] ) && resource[:password]
+      # Try logging in with the new password first, in case it has been
+      # set already.
+      if token = loginwith(resource[:password])
+        return token
+      end
+    end
+    return loginwith(resource[:api_password])
+  end
+
+  def loginwith(password)
     params = {
       :login    => resource[:api_login],
-      :password => resource[:api_password]
+      :password => password
     }
     uri = '/session'
     response = RestClient.post(resource[:api_url] + uri, params)
@@ -88,6 +97,8 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
     else
       return nil
     end
+  rescue
+    return nil
   end
     
   # Retrieve the user record.
