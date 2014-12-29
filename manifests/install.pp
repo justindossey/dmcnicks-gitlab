@@ -63,7 +63,7 @@ class gitlab::install (
         force        => false,
         cnf_tpl      => 'openssl/cert.cnf.erb',
         base_dir     => $ssl_cert_dir,
-        before       => Exec['gitlab-postinstall']
+        notify       => Exec['gitlab-postinstall']
     }
   }
 
@@ -83,15 +83,8 @@ class gitlab::install (
   exec { 'gitlab-install':
     path        => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
     command     => "$installer_cmd $installer_path",
-    refreshonly => true
-  } ~>
-
-  # Run the post-install configuration if the installer has been run.
-
-  exec { 'gitlab-postinstall':
-    path        => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
-    command     => "gitlab-ctl reconfigure",
-    refreshonly => true
+    refreshonly => true,
+    notify      => Exec['gitlab-postinstall']
   }
 
   # Create the gitlab.rb file.
@@ -100,7 +93,14 @@ class gitlab::install (
     ensure  => 'present',
     content => template('gitlab/gitlab.rb.erb'),
     mode    => '0600',
-    before  => Exec['gitlab-postinstall']
+    notify  => Exec['gitlab-postinstall']
   }
 
+  # Run the post-install configuration if the installer has been run.
+
+  exec { 'gitlab-postinstall':
+    path        => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
+    command     => "gitlab-ctl reconfigure",
+    refreshonly => true
+  }
 }
