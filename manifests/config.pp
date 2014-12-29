@@ -51,12 +51,13 @@ class gitlab::config (
 
   # Change the default Gitlab password.
 
-#  gitlab_user_password { $api_login:
-#    password     => $api_password,
-#    api_login    => $api_login,
-#    api_password => $default_password,
-#    api_url      => $api_url
-#  } ->
+  gitlab_user { $api_login:
+    ensure       => 'present',
+    password     => $api_password,
+    api_login    => $api_login,
+    api_password => $default_password,
+    api_url      => $api_url
+  } ->
 
   # Generate an SSH keypair for the root user if one does not exist.
 
@@ -71,7 +72,7 @@ class gitlab::config (
     username     => $api_login,
     userkey      => 'root',
     api_login    => $api_login,
-    api_password => $default_password,
+    api_password => $api_password,
     api_url      => $api_url
   }
 }
