@@ -17,6 +17,12 @@
 # [*installer_cmd*]
 #   The package command to use to install Gitlab.
 #
+# [*worker_processes*]
+#   The number of worker processes that Gitlab should run.
+#
+# [*ssl*]
+#   True if SSL should be enabled.
+#
 # [*default_password*]
 #   The default password for the admin user set by the installer.
 #
@@ -44,6 +50,8 @@ class gitlab (
   $installer_dir = $gitlab::params::installer_dir,
   $installer_file = $gitlab::params::installer_file,
   $installer_cmd = $gitlab::params::installer_cmd,
+  $ssl = $gitlab::params::ssl,
+  $worker_processes = $gitlab::params::worker_processes,
   $default_password = $gitlab::params::default_password,
   $api_login = $gitlab::params::api_login,
   $api_url = $gitlab::params::api_url
@@ -54,9 +62,11 @@ class gitlab (
   $installer_path = "${installer_dir}/${installer_file}"
 
   class { 'gitlab::install':
-    download_url   => $download_url,
-    installer_path => $installer_path,
-    installer_cmd  => $installer_cmd
+    download_url     => $download_url,
+    installer_path   => $installer_path,
+    installer_cmd    => $installer_cmd,
+    worker_processes => $worker_processes,
+    ssl              => $ssl
   } ->
 
   # Configure Gitlab.

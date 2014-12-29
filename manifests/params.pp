@@ -13,6 +13,9 @@
 
 class gitlab::params () {
 
+  $ssl = false
+  $worker_processes = 2
+
   $default_password = '5iveL!fe'
   $api_login = 'root'
   $api_url = "http://${::fqdn}/api/v3"

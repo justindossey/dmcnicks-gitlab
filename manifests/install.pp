@@ -14,6 +14,12 @@
 # [*installer_cmd*]
 #   The package command to use to install Gitlab.
 #
+# [*worker_processes*]
+#   The number of worker processes that Gitlab should run.
+#
+# [*ssl*]
+#   True if SSL should be enabled.
+#
 # === Authors
 #
 # David McNicol <david@mcnicks.org>
@@ -26,8 +32,33 @@
 class gitlab::install (
   $download_url,
   $installer_path,
-  $installer_cmd
+  $installer_cmd,
+  $worker_processes,
+  $ssl = false
 ) {
+
+  # Create a certificate if SSL is enabled.
+
+  if $ssl {
+
+    $ssl_cert_dir = '/etc/gitlab/ssl'
+
+    file { $ssl_cert_dir:
+      ensure => 'directory'
+    } ->
+
+    openssl::certificate::x509 { $::fqdn:
+        ensure       => 'present',
+        country      => 'UK',
+        organization => 'Gitlab',
+        commonname   => $::fqdn,
+        days         => '3650',
+        force        => false,
+        cnf_tpl      => 'openssl/cert.cnf.erb',
+        base_dir     => $ssl_cert_dir,
+        before       => Exec['gitlab-postinstall']
+    }
+  }
 
   # Download the installer file if it does not exist on the file system
   # already. This may take some time so timeout has been increased to 
@@ -47,6 +78,16 @@ class gitlab::install (
     command     => "$installer_cmd $installer_path",
     refreshonly => true
   } ~>
+
+  # Create the gitlab.rb file.
+
+  $http_scheme = $ssl ? { true  => 'https', false => 'http' }
+
+  file { '/etc/gitlab/gitlab.rb':
+    ensure  => 'present',
+    content => template('gitlab/gitlab.rb.erb'),
+    mode    => '0600'
+  } ->
 
   # Run the post-install configuration if the installer has been run.
 
