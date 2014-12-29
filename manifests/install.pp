@@ -31,7 +31,7 @@ class gitlab::install (
 
   exec { 'gitlab-download':
     path    => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
-    command => "curl ${download_url} -o ${installer_file}",
+    command => "wget ${download_url} -O ${installer_file}",
     timeout => '900',
     creates => $installer_file
   } ->
