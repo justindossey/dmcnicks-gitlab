@@ -1,6 +1,9 @@
 require 'json'
 
-Puppet::Type.type(:gitlab_user).provide(:ruby) do
+Puppet::Type.type(:gitlab_user).provide(
+  :ruby,
+  :parent => Puppet::Provider::Gitlab_session
+) do
 
   desc 'Default provider for gitlab_user type'
 
@@ -18,7 +21,6 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
   end  
 
   def create
-    token = login
     params = {
       :private_token => token,
       :username      => resource[:username],
@@ -31,11 +33,10 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
   end
 
   def destroy
-    token = login
     params = {
       :private_token => token
     }
-    uri = '/users/%s' % user(token)['id']
+    uri = '/users/%s' % user['id']
     RestClient.delete(resource[:api_url] + uri, params)
   end
 
@@ -69,42 +70,17 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
     @property_hash[:password] = value
   end
 
-  # Perform a login and return a session token.
-  
-  def login
-    # If the password of the api_login user is being set we have to
-    # do something clever here.
-    if ( resource[:username] == resource[:api_login] ) && resource[:password]
-      # Try logging in with the new password first, in case it has been
-      # set already.
-      if token = loginwith(resource[:password])
-        return token
-      end
-    end
-    return loginwith(resource[:api_password])
+  # Flush properties that have been set.
+
+  def flush
+    @property_hash[:private_token] = token
+    uri = '/users/%s' % user['id']
+    RestClient.put(resource[:api_url] + uri, @property_hash)
   end
 
-  def loginwith(password)
-    params = {
-      :login    => resource[:api_login],
-      :password => password
-    }
-    uri = '/session'
-    response = RestClient.post(resource[:api_url] + uri, params)
-    if response.code == 201
-      session = JSON.parse(response)
-      return session['private_token']
-    else
-      return nil
-    end
-  rescue
-    return nil
-  end
-    
   # Retrieve the user record.
  
-  def user(token = nil)
-    token = token ? token : login
+  def user
     params = {
       :private_token => token
     }
@@ -120,14 +96,4 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
       return nil
     end
   end
-
-  # Flush any property changes.
-
-  def flush
-    token = login
-    @property_hash[:private_token] = token
-    uri = '/users/%s' % user(token)['id']
-    RestClient.put(resource[:api_url] + uri, @property_hash)
-  end
-
 end

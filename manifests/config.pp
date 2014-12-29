@@ -49,19 +49,21 @@ class gitlab::config (
     provider => 'gem'
   }
 
-  # Change the default Gitlab password. There is special logic in the
-  # gitlab_user provider to allow the Gitlab root password to be set once
-  # like this. Bear in mind that Puppet manifests are declarative. That is,
-  # they describe a desired state rather than a recipe to get from one state
-  # to another, so this sort of thing will usually not work.
+  # Login to the Gitlab API.
+
+  gitlab_session { 'config':
+    api_url      => $api_url,
+    api_login    => $api_login,
+    api_password => $default_password
+  }
+
+  # Change the default Gitlab password.
 
   gitlab_user { $api_login:
     ensure       => 'present',
-    password     => $api_password,
-    api_login    => $api_login,
-    api_password => $default_password,
-    api_url      => $api_url
-  } ->
+    fullname     => 'Joe Bloggs',
+    require      => Gitlab_session['config']
+  }
 
   # Generate an SSH keypair for the root user if one does not exist.
 
@@ -69,14 +71,12 @@ class gitlab::config (
     homedir => '/root'
   } ->
 
-  # Associate the root user public key with the Gitlab admin user.
+  # Associate the root user public key with the Gitlab root user.
 
-  gitlab_user_key { $api_login:
+  gitlab_user_key { 'root-key':
     ensure       => 'present',
-    username     => $api_login,
-    userkey      => 'root',
-    api_login    => $api_login,
-    api_password => $api_password,
-    api_url      => $api_url
+    username     => 'root',
+    fromuser     => 'root',
+    require      => Gitlab_session['config']
   }
 }

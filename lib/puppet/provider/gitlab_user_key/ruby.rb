@@ -1,4 +1,7 @@
-Puppet::Type.type(:gitlab_user_key).provide(:ruby) do
+Puppet::Type.type(:gitlab_user_key).provide(
+  :ruby,
+  :parent => Puppet::Provider::Gitlab_session
+) do
 
   desc 'Default provider for gitlab_user_key type'
 
@@ -16,99 +19,37 @@ Puppet::Type.type(:gitlab_user_key).provide(:ruby) do
   end  
 
   def create
-    token = login()
-    key = key()
-    user_id = user_id(resource[:username])
     params = {
       :private_token => token,
       :title         => resource[:title],
-      :key           => key,
+      :key           => newkey,
     }
-    keys_uri = "/users/%s/keys" % user_id
-    RestClient.post(resource[:api_url] + keys_uri, params)
+    uri = "/users/%s/keys" % user_id
+    RestClient.post(resource[:api_url] + uri, params)
   end
 
   def destroy
-    user_id = user_id(resource[:username])
-    id = id(
-      :title => resource[:title],
-      :user_id => user_id
-    )
-    token = login()
     params = {
       :private_token => token
     }
-    keys_uri = "/users/%s/keys/" % user_id
-    RestClient.delete(resource[:api_url] + keys_uri + id.to_s, params)
+    uri = "/users/%s/keys/%s" % [ user_id, key_id ]
+    RestClient.delete(resource[:api_url] + uri, params)
   end
 
   def exists?
-    return id(
-      :title => resource[:title],
-      :user_id => user_id(resource[:username])
-    )
+    return key(resource[:title]) != nil
   end
 
-  def login
-    params = {
-      :login    => resource[:api_login],
-      :password => resource[:api_password]
-    }
-    response = RestClient.post(resource[:api_url] + '/session', params)
-    if response.code == 201
-      session = JSON.parse(response)
-      return session['private_token']
-    else
-      return nil
-    end
-  end
-    
-  def id(key = {})
-    token = login
-    params = {
-      :private_token => token,
-      :id            => key[:user_id]
-    }
-    keys_uri = "/users/%s/keys" % key[:user_id]
-    response = RestClient.get(resource[:api_url] + keys_uri, params)
-    if response.code == 200
-      user_keys = JSON.parse(response)
-      user_keys.each do |user_key|
-        if user_key['title'] == key[:title]
-          return user_key['id']
-        end
-      end
-      return nil
-    else
-      return nil
-    end
-  end
+  # Returns the new key.
 
-  def user_id(username)
-    token = login
-    params = {
-      :private_token => token
-    }
-    response = RestClient.get(resource[:api_url] + '/users', params)
-    if response.code == 200
-      users = JSON.parse(response)
-      users.each do |user|
-        if user['username'] == username
-          return user['id']
-        end
-      end
-      return nil
-    else
-      return nil
-    end
-  end
-
-  def key
+  def newkey
+    # If the new key has been specified explicitly, just return it.
     if resource[:key]
       return resource[:key]
     end
-    if resource[:userkey]
-      homedir = Dir.home(resource[:userkey])
+    # If a user has been specified, find the key in the user's home directory.
+    if resource[:fromuser]
+      homedir = Dir.home(resource[:fromuser])
       keyfile = File.join(homedir, '.ssh', 'id_rsa.pub')
       if ! File.exists?(keyfile)
         keyfile = File.join(homedir, '.ssh', 'id_dsa.pub')
@@ -120,4 +61,43 @@ Puppet::Type.type(:gitlab_user_key).provide(:ruby) do
     end
   end
 
+  # Retrieve the key ID.
+
+  def key_id
+    params = {
+      :private_token => token,
+    }
+    uri = "/users/%s/keys" % user_id
+    response = RestClient.get(resource[:api_url] + uri, params)
+    if response.code == 200
+      keys = JSON.parse(response)
+      keys.each do |key|
+        if key['title'] == resource[:title]
+          return key['id']
+        end
+      end
+      return nil
+    else
+      return nil
+    end
+  end
+
+  # Retrieve the user ID.
+
+  def user_id
+    params = {
+      :private_token => token
+    }
+    uri = '/users'
+    response = RestClient.get(resource[:api_url] + uri, params)
+    if response.code == 200
+      users = JSON.parse(response)
+      users.each do |user|
+        if user['username'] == resource[:username]
+          return user['id']
+        end
+      end
+      return nil
+    end
+  end
 end
