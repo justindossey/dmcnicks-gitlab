@@ -44,12 +44,21 @@ class gitlab (
   $api_login = $gitlab::params::api_login,
   $api_url = $gitlab::params::api_url
 ) inherits gitlab::params {
+  
+  # We need to complete the install before starting the configuration
+  # so that the Ruby packages are installed before the providers used by
+  # the config class are called.
+
+  stage { 'first':
+    before => Stage['main'],
+  }
 
   class { 'gitlab::install':
     download_url   => $download_url,
     installer_file => $installer_file,
-    installer_cmd  => $installer_cmd
-  } ->
+    installer_cmd  => $installer_cmd,
+    stage          => 'first'
+  }
 
   class { 'gitlab::config':
     default_password => $default_password,
