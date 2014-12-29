@@ -39,7 +39,7 @@ class gitlab::install (
 
   # Create a certificate if SSL is enabled.
 
-  if $ssl {
+  if str2bool($ssl) {
 
     $ssl_cert_dir = '/etc/gitlab/ssl'
 
