@@ -35,7 +35,7 @@ define gitlab::keygen (
   exec { "keygen-${title}":
     path    => [ "/bin", "/usr/bin" ],
     command => "ssh-keygen -t ${type} -b ${bits} -N '' -C ${comment} -f \"${file}\"",
-    user    => ${title},
+    user    => $title,
     creates => $file
   }
 }
