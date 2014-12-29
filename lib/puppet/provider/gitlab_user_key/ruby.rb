@@ -25,7 +25,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
       :key           => newkey,
     }
     uri = "/users/%s/keys" % user_id
-    RestClient.post(resource[:api_url] + uri, params)
+    RestClient.post(api_url + uri, params)
   end
 
   def destroy
@@ -33,11 +33,11 @@ Puppet::Type.type(:gitlab_user_key).provide(
       :private_token => token
     }
     uri = "/users/%s/keys/%s" % [ user_id, key_id ]
-    RestClient.delete(resource[:api_url] + uri, params)
+    RestClient.delete(api_url + uri, params)
   end
 
   def exists?
-    return key(resource[:title]) != nil
+    return key_id != nil
   end
 
   # Returns the new key.
@@ -68,7 +68,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
       :private_token => token,
     }
     uri = "/users/%s/keys" % user_id
-    response = RestClient.get(resource[:api_url] + uri, params)
+    response = RestClient.get(api_url + uri, params)
     if response.code == 200
       keys = JSON.parse(response)
       keys.each do |key|
@@ -89,7 +89,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
       :private_token => token
     }
     uri = '/users'
-    response = RestClient.get(resource[:api_url] + uri, params)
+    response = RestClient.get(api_url + uri, params)
     if response.code == 200
       users = JSON.parse(response)
       users.each do |user|
