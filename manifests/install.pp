@@ -43,12 +43,4 @@ class gitlab::install (
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
     command => "gitlab-ctl reconfigure"
   }
-
-  # Load the ruby REST client.
-
-  package { 'rest-client':
-    ensure   => 'present',
-    provider => 'gem'
-  }
-
 }
