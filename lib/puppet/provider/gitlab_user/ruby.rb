@@ -35,7 +35,7 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
     params = {
       :private_token => token
     }
-    uri = '/users/' + user(token)['id']
+    uri = '/users/%s' % user(token)['id']
     RestClient.delete(resource[:api_url] + uri, params)
   end
 
@@ -126,7 +126,7 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
   def flush
     token = login
     @property_hash[:private_token] = token
-    uri = '/users/' + user(token)['id']
+    uri = '/users/%s' % user(token)['id']
     RestClient.put(resource[:api_url] + uri, @property_hash)
   end
 
