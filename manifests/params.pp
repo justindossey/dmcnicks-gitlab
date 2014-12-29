@@ -17,9 +17,10 @@ class gitlab::params () {
   $api_login = 'root'
   $api_url = "https://${::fqdn}/api/v3"
 
-  $installer_file = $::osfamily ? {
-    'Debian' => '/tmp/gitlab.deb',
-    'RedHat' => '/tmp/gitlab.rpm'
+  $installer_file = $::operatingsystem ? {
+    'Debian' => "/tmp/gitlab-debian${::operatingsystemmajrelease}.deb",
+    'Ubuntu' => "/tmp/gitlab-ubuntu${::operatingsystemmajrelease}.deb",
+    'CentOS' => "/tmp/gitlab-centos${::operatingsystemmajrelease}.rpm"
   }
 
   $installer_cmd = $::osfamily ? {
