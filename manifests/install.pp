@@ -34,15 +34,17 @@ class gitlab::install (
     command => "wget ${download_url} -O ${installer_file}",
     timeout => '900',
     creates => $installer_file
-  } ->
+  } ~>
 
   exec { 'gitlab-install':
-    path    => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
-    command => "$installer_cmd $installer_file",
-  } ->
+    path        => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
+    command     => "$installer_cmd $installer_file",
+    refreshonly => true
+  } ~>
 
   exec { 'gitlab-postinstall':
-    path    => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
-    command => "gitlab-ctl reconfigure"
+    path        => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
+    command     => "gitlab-ctl reconfigure",
+    refreshonly => true
   }
 }
