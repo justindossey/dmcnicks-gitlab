@@ -23,10 +23,19 @@ Puppet::Type.newtype(:gitlab_user_key) do
   end
 
   newparam(:key) do
-    desc 'The user key itself'
+    desc 'The key itself'
     validate do |value|
       unless value =~ /^ssh-[dr]sa [^ ]+ [\w@\.\-_]+$/
         raise ArgumentError , "%s is not a valid user key" % value
+      end
+    end
+  end
+
+  newparam(:userkey) do
+    desc 'Username to fetch public key from'
+    validate do |value|
+      unless value =~ /^[a-z0-9]+$/
+        raise ArgumentError , "%s is not a user name" % value
       end
     end
   end
@@ -59,6 +68,9 @@ Puppet::Type.newtype(:gitlab_user_key) do
     end
     unless self[:title] 
       raise Puppet::Error, "key title is required"
+    end
+    unless self[:key] or self[:userkey]
+      raise Puppet::Error, "either key or userkey is required"
     end
   end
 

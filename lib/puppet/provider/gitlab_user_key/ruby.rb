@@ -96,15 +96,17 @@ Puppet::Type.type(:gitlab_user_key).provide(:ruby) do
     if resource[:key]
       return resource[:key]
     end
-    homedir = Dir.home(resource[:username])
-    keyfile = File.join(homedir, '.ssh', 'id_dsa.pub')
-    if ! File.exists?(keyfile)
+    if resource[:userkey]
+      homedir = Dir.home(resource[:userkey])
       keyfile = File.join(homedir, '.ssh', 'id_rsa.pub')
+      if ! File.exists?(keyfile)
+        keyfile = File.join(homedir, '.ssh', 'id_dsa.pub')
+      end
+      if File.exists?(keyfile)
+       return File.open(keyfile).read.chomp
+      end
+      return nil
     end
-    if File.exists?(keyfile)
-     return File.open(keyfile).read.chomp
-    end
-    return nil
   end
 
 end
