@@ -18,7 +18,7 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
   end  
 
   def create
-    token = login()
+    token = login
     params = {
       :private_token => token,
       :username      => resource[:username],
@@ -26,28 +26,62 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
       :email         => resource[:email],
       :name          => resource[:fullname]
     }
-    RestClient.post(resource[:api_url] + '/users', params)
+    uri = '/users'
+    RestClient.post(resource[:api_url] + uri, params)
   end
 
   def destroy
-    id = id(resource[:username])
-    token = login()
+    token = login
     params = {
       :private_token => token
     }
-    RestClient.delete(resource[:api_url] + '/users/' + id.to_s, params)
+    uri = '/users/' + user_id(resource[:username], token)
+    RestClient.delete(resource[:api_url] + uri, params)
   end
 
   def exists?
-    return id(resource[:username])
+    return user_id(resource[:username])
   end
 
+  # Allow password to be set.
+
+  def password
+    get['password']
+  end
+
+  def password(value)
+    set(:password, value)
+  end
+
+  # Allow email address to be set.
+
+  def email
+    get['email']
+  end
+
+  def email(value)
+    set(:email, value)
+  end
+
+  # Allow full name to be set.
+
+  def name
+    get['name']
+  end
+
+  def name(value)
+    set(:name, value)
+  end
+
+  # Internal methods.
+  
   def login
     params = {
       :login    => resource[:api_login],
       :password => resource[:api_password]
     }
-    response = RestClient.post(resource[:api_url] + '/session', params)
+    uri = '/session'
+    response = RestClient.post(resource[:api_url] + uri, params)
     if response.code == 201
       session = JSON.parse(response)
       return session['private_token']
@@ -56,17 +90,46 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
     end
   end
     
-  def id(username)
-    token = login
+  def get(token = nil)
+    token = token ? token : login
     params = {
       :private_token => token
     }
-    response = RestClient.get(resource[:api_url] + '/users', params)
+    uri = '/users'
+    response = RestClient.get(resource[:api_url] + uri, params)
+    if response.code == 200
+      users = JSON.parse(response)
+      users.each do |user|
+        if user['username'] == resource[:username]
+          return user
+        end
+      end
+      return nil
+    end
+  end
+
+  def set(name, value, token = nil)
+    token = token ? token : login
+    params = {
+      name => value,
+      :private_token => token
+    }
+    uri = '/users/' + user_id(resource[:username], token)
+    RestClient.put(resource[:api_url] + uri, params)
+  end
+
+  def user_id(username, token = nil)
+    token = token ? token : login
+    params = {
+      :private_token => token
+    }
+    uri = '/users'
+    response = RestClient.get(resource[:api_url] + uri, params)
     if response.code == 200
       users = JSON.parse(response)
       users.each do |user|
         if user['username'] == username
-          return user['id']
+          return user['id'].to_s
         end
       end
       return nil
