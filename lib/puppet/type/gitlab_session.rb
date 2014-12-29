@@ -6,7 +6,7 @@ Puppet::Type.newtype(:gitlab_session) do
 
   newparam(:name) do
     desc 'The name of this Gitlab session'
-  done
+  end
 
   newparam(:api_url) do
     desc 'The URL of the Gitlab API'
@@ -35,5 +35,4 @@ Puppet::Type.newtype(:gitlab_session) do
       raise Puppet::Error, "api_url, api_login, api_password are required"
     end
   end
-
 end
