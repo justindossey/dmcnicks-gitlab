@@ -32,6 +32,19 @@ class gitlab::config (
   $api_url
 ) {
 
+ # The Gitlab configuration providers require the Ruby rest-client gem. Note
+ # that this package will be installed on the first puppet run. The providers
+ # themselves are confined to only run once the rest-client package is
+ # available. Since providers are autoloaded in the pluginsync stage this
+ # means that they will not run during the first puppet run. The next time
+ # the agent is calle,d the rest-client package will be available, the confine
+ # will return true and the providers will run.
+
+ package { 'rest-client':
+   ensure   => 'present',
+   provider => 'gem'
+ }
+
   # Change the default Gitlab password.
 
 #  gitlab_user_password { $api_login:

@@ -1,9 +1,21 @@
-require 'rest_client'
 require 'json'
 
 Puppet::Type.type(:gitlab_user).provide(:ruby) do
 
   desc 'Default provider for gitlab_user type'
+
+  # Confine the provider to only run once the rest-client package is
+  # available. Puppet will install the rest-client package during the
+  # first run. This confine will return true in subsequent runs.
+  
+  confine :true => begin
+    begin
+      require 'rest_client'
+      true
+    rescue LoadError
+      false
+    end
+  end  
 
   def create
     token = login()
