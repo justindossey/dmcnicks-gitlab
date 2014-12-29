@@ -8,8 +8,11 @@
 #   The download URL for Gitlab omnibus edition. Get the latest from
 #   https://about.gitlab.com/downloads/.
 #
+# [*installer_dir*]
+#   The local path to the Gitlab omnibus install package file.
+#
 # [*installer_file*]
-#   The local path of the Gitlab omnibus install package file.
+#   The name of the Gitlab omnibus install package file.
 #
 # [*installer_cmd*]
 #   The package command to use to install Gitlab.
@@ -38,6 +41,7 @@
 class gitlab (
   $download_url,
   $api_password,
+  $installer_dir = $gitlab::params::installer_dir,
   $installer_file = $gitlab::params::installer_file,
   $installer_cmd = $gitlab::params::installer_cmd,
   $default_password = $gitlab::params::default_password,
@@ -47,9 +51,11 @@ class gitlab (
   
   # Install Gitlab.
 
+  $installer_path = "${installer_dir}/${installer_file}"
+
   class { 'gitlab::install':
     download_url   => $download_url,
-    installer_file => $installer_file,
+    installer_path => $installer_path,
     installer_cmd  => $installer_cmd
   } ->
 

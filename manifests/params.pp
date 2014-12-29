@@ -17,10 +17,12 @@ class gitlab::params () {
   $api_login = 'root'
   $api_url = "http://${::fqdn}/api/v3"
 
+  $installer_dir = '/srv'
+
   $installer_file = $::operatingsystem ? {
-    'Debian' => "/tmp/gitlab-debian${::operatingsystemmajrelease}.deb",
-    'Ubuntu' => "/tmp/gitlab-ubuntu${::operatingsystemmajrelease}.deb",
-    'CentOS' => "/tmp/gitlab-centos${::operatingsystemmajrelease}.rpm"
+    'Debian' => "gitlab-debian${::operatingsystemmajrelease}.deb",
+    'Ubuntu' => "gitlab-ubuntu${::operatingsystemmajrelease}.deb",
+    'CentOS' => "gitlab-centos${::operatingsystemmajrelease}.rpm"
   }
 
   $installer_cmd = $::osfamily ? {

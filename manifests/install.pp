@@ -8,7 +8,7 @@
 #   The download URL for Gitlab omnibus edition. Get the latest from
 #   https://about.gitlab.com/downloads/.
 #
-# [*installer_file*]
+# [*installer_path*]
 #   The local path of the Gitlab omnibus install package file.
 #
 # [*installer_cmd*]
@@ -25,22 +25,30 @@
 
 class gitlab::install (
   $download_url,
-  $installer_file,
+  $installer_path,
   $installer_cmd
 ) {
 
+  # Download the installer file if it does not exist on the file system
+  # already. This may take some time so timeout has been increased to 
+  # 15 minutes.
+
   exec { 'gitlab-download':
     path    => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
-    command => "wget ${download_url} -O ${installer_file}",
+    command => "wget ${download_url} -O ${installer_path}",
     timeout => '900',
-    creates => $installer_file
+    creates => $installer_path
   } ~>
+
+  # Run the installer if the contents of the installer file have changed.
 
   exec { 'gitlab-install':
     path        => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
-    command     => "$installer_cmd $installer_file",
+    command     => "$installer_cmd $installer_path",
     refreshonly => true
   } ~>
+
+  # Run the post-install configuration if the installer has been run.
 
   exec { 'gitlab-postinstall':
     path        => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
