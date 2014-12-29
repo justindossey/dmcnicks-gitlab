@@ -49,7 +49,7 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
     get['password']
   end
 
-  def password(value)
+  def password=(value)
     set(:password, value)
   end
 
@@ -59,7 +59,7 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
     get['email']
   end
 
-  def email(value)
+  def email=(value)
     set(:email, value)
   end
 
@@ -69,7 +69,7 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
     get['name']
   end
 
-  def fullname(value)
+  def fullname=(value)
     set(:name, value)
   end
 
