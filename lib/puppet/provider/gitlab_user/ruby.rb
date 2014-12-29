@@ -24,7 +24,7 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
       :username      => resource[:username],
       :password      => resource[:password],
       :email         => resource[:email],
-      :name          => resource[:fullname]
+      :name          => resource[:name]
     }
     uri = '/users'
     RestClient.post(resource[:api_url] + uri, params)
@@ -63,7 +63,7 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
     set(:email, value)
   end
 
-  # Allow full name to be set.
+  # Allow name to be set.
 
   def name
     get['name']

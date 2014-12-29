@@ -26,8 +26,8 @@ Puppet::Type.newtype(:gitlab_user) do
     desc 'The password for the user'
   end
 
-  newparam(:fullname) do
-    desc 'The full name of the user'
+  newparam(:name) do
+    desc 'The name of the user'
     validate do |value|
       unless value =~ /^([\w\-_\. ]+)$/
         raise ArgumentError , "%s is not a valid name" % value

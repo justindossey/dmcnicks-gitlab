@@ -54,6 +54,8 @@ class gitlab::config (
   gitlab_user { $api_login:
     ensure       => 'present',
     password     => $api_password,
+    email        => 'david@mcnicks.org',
+    fullname     => 'David McNicol',
     api_login    => $api_login,
     api_password => $default_password,
     api_url      => $api_url
