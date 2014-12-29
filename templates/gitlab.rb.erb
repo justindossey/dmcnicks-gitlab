@@ -4,36 +4,3 @@ nginx['redirect_http_to_https_port'] = 80
 nginx['ssl_certificate'] = "/etc/gitlab/ssl/<%= @fqdn %>.crt"
 nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/<%= @fqdn %>.key"
 unicorn['worker_processes'] = <%= @worker_processes %>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
