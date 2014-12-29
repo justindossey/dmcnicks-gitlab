@@ -45,11 +45,28 @@ class gitlab (
   $api_url = $gitlab::params::api_url
 ) inherits gitlab::params {
   
+  # Install Gitlab.
+
   class { 'gitlab::install':
     download_url   => $download_url,
     installer_file => $installer_file,
     installer_cmd  => $installer_cmd
   } ->
+
+  # Generate an SSH keypair for the root user if one does not exist.
+
+  gitlab::keygen { 'root':
+    homedir => '/root'
+  } ->
+
+  # The Gitlab configuration providers require the Ruby rest-client gem.
+
+  package { 'rest-client':
+    ensure   => 'present',
+    provider => 'gem'
+  } ->
+
+  # Configure Gitlab.
 
   class { 'gitlab::config':
     default_password => $default_password,
