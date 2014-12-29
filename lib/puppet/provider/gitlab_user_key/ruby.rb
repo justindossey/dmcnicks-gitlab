@@ -1,6 +1,6 @@
 Puppet::Type.type(:gitlab_user_key).provide(
   :ruby,
-  :parent => Puppet::Provider::Gitlab_session
+  :parent => Puppet::Type.type(:gitlab_session).provider(:ruby)
 ) do
 
   desc 'Default provider for gitlab_user_key type'
