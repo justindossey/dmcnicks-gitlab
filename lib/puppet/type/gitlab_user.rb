@@ -13,7 +13,7 @@ Puppet::Type.newtype(:gitlab_user) do
     end
   end
 
-  newparam(:email) do
+  newproperty(:email) do
     desc 'The email address of the user'
     validate do |value|
       unless value =~ /^[a-z0-9]+@(\w+)(\.\w+)+$/
@@ -22,11 +22,11 @@ Puppet::Type.newtype(:gitlab_user) do
     end
   end
 
-  newparam(:password) do
+  newproperty(:password) do
     desc 'The password for the user'
   end
 
-  newparam(:fullname) do
+  newproperty(:fullname) do
     desc 'The full name of the user'
     validate do |value|
       unless value =~ /^([\w\-_\. ]+)$/
