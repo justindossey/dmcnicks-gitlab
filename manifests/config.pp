@@ -35,8 +35,8 @@ class gitlab::config (
   # Load the ruby REST client.
 
   package { 'rest-client':
-    ensure      => 'present',
-    provisioner => 'gem'
+    ensure   => 'present',
+    provider => 'gem'
   }
 
   # Change the default Gitlab password.
