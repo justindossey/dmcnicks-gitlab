@@ -7,11 +7,11 @@ Puppet::Type.type(:gitlab_session).provide(:ruby) do
   # Class variable used to store the private token created by the API
   # after login.
   
-  @@token = nil
+  class_variable_set(:@@token, nil)
   
   # The URL of the API.
 
-  @@api_url = nil
+  class_variable_set(:@@api_url, nil)
 
   # Confine the provider to only run once the rest-client package is
   # available. Puppet will install the rest-client package during the
@@ -27,7 +27,7 @@ Puppet::Type.type(:gitlab_session).provide(:ruby) do
   end  
 
   def create
-    @@api_url = resource[:api_url]
+    class_variable_set(:@@api_url, resource[:api_url])
     params = {
       :login    => resource[:api_login],
       :password => resource[:api_password]
@@ -35,23 +35,23 @@ Puppet::Type.type(:gitlab_session).provide(:ruby) do
     response = RestClient.post(api_url + '/session', params)
     if response.code == 201
       session = JSON.parse(response)
-      @@token = session['private_token']
+      class_variable_set(:@@token, session['private_token'])
     end
   end
 
   def destroy
-    @@token = nil
+    class_variable_set(:@@token, nil)
   end
 
   def exists?
-    return @@token != nil
+    token != nil
   end
 
   def token
-    return @@token
+    class_variable_get(:@@token)
   end
 
   def api_url
-    return @@api_url
+    class_variable_get(:@@api_url)
   end
 end
