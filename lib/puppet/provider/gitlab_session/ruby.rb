@@ -4,6 +4,9 @@ Puppet::Type.type(:gitlab_session).provide(:ruby) do
 
   desc 'Default provider for gitlab_session type'
 
+  Puppet::Type.class_variable_set(:@@gitlab_token, nil)
+  Puppet::Type.class_variable_set(:@@gitlab_api_url, nil)
+
   # Confine the provider to only run once the rest-client package is
   # available. Puppet will install the rest-client package during the
   # first run. This confine will return true in subsequent runs.
