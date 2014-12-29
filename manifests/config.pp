@@ -32,6 +32,13 @@ class gitlab::config (
   $api_url
 ) {
 
+  # Load the ruby REST client.
+
+  package { 'rest-client':
+    ensure      => 'present',
+    provisioner => 'gem'
+  }
+
   # Change the default Gitlab password.
 
 #  gitlab_user_password { $api_login:
@@ -53,6 +60,7 @@ class gitlab::config (
     userkey      => 'root',
     api_login    => $api_login,
     api_password => $default_password,
-    api_url      => $api_url
+    api_url      => $api_url,
+    require      => Package['rest-client']
   }
 }
