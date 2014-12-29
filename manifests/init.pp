@@ -49,7 +49,7 @@ class gitlab (
     download_url   => $download_url,
     installer_file => $installer_file,
     installer_cmd  => $installer_cmd
-  }
+  } ->
 
   class { 'gitlab::config':
     default_password => $default_password,

@@ -33,12 +33,12 @@ class gitlab::install (
     path    => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
     command => "curl ${download_url} -o ${installer_file}",
     creates => $installer_file
-  } ~>
+  } ->
 
   exec { 'gitlab-install':
     path    => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
     command => "$installer_cmd $installer_file",
-  } ~>
+  } ->
 
   exec { 'gitlab-postinstall':
     path    => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
