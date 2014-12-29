@@ -37,6 +37,13 @@ class gitlab::install (
   $ssl = false
 ) {
 
+  # Work out whether to use http or https.
+
+  $http_scheme = str2bool($ssl) ? {
+    true  => 'https',
+    false => 'http'
+  }
+
   # Create a certificate if SSL is enabled.
 
   if str2bool($ssl) {
@@ -79,19 +86,6 @@ class gitlab::install (
     refreshonly => true
   } ~>
 
-  # Create the gitlab.rb file.
-
-  $http_scheme = str2bool($ssl) ? {
-    true  => 'https',
-    false => 'http'
-  }
-
-  file { '/etc/gitlab/gitlab.rb':
-    ensure  => 'present',
-    content => template('gitlab/gitlab.rb.erb'),
-    mode    => '0600'
-  } ->
-
   # Run the post-install configuration if the installer has been run.
 
   exec { 'gitlab-postinstall':
@@ -99,4 +93,14 @@ class gitlab::install (
     command     => "gitlab-ctl reconfigure",
     refreshonly => true
   }
+
+  # Create the gitlab.rb file.
+
+  file { '/etc/gitlab/gitlab.rb':
+    ensure  => 'present',
+    content => template('gitlab/gitlab.rb.erb'),
+    mode    => '0600',
+    before  => Exec['gitlab-postinstall']
+  }
+
 }
