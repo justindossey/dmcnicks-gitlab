@@ -58,7 +58,7 @@ Puppet::Type.type(:gitlab_user).provide(:ruby) do
   end
 
   def fullname=(value)
-    @property_hash[:fullname] = value
+    @property_hash[:name] = value
   end
 
   def password
