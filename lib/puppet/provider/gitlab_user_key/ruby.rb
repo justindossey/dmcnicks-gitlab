@@ -6,11 +6,12 @@ Puppet::Type.type(:gitlab_user_key).provide(:ruby) do
 
   def create
     token = login()
+    key = key()
     user_id = user_id(resource[:username])
     params = {
       :private_token => token,
       :title         => resource[:title],
-      :key           => resource[:key]
+      :key           => key,
     }
     keys_uri = "/users/%s/keys" % user_id
     RestClient.post(resource[:api_url] + keys_uri, params)
@@ -89,6 +90,21 @@ Puppet::Type.type(:gitlab_user_key).provide(:ruby) do
     else
       return nil
     end
+  end
+
+  def key
+    if resource[:key]
+      return resource[:key]
+    end
+    homedir = Dir.home(resource[:username])
+    keyfile = File.join(homedir, '.ssh', 'id_dsa.pub')
+    if ! File.exists?(keyfile)
+      keyfile = File.join(homedir, '.ssh', 'id_rsa.pub')
+    end
+    if File.exists?(keyfile)
+     return File.open(keyfile).read.chomp
+    end
+    return nil
   end
 
 end
