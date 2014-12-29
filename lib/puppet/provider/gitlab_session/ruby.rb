@@ -4,6 +4,11 @@ Puppet::Type.type(:gitlab_session).provide(:ruby) do
 
   desc 'Default provider for gitlab_session type'
 
+  # Class variable used to store the private token created by the API
+  # after login.
+  
+  @@token = nil
+
   # Confine the provider to only run once the rest-client package is
   # available. Puppet will install the rest-client package during the
   # first run. This confine will return true in subsequent runs.
