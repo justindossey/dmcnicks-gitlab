@@ -30,10 +30,10 @@ The `gitlab` module is a
 All of the defined types use the Gitlab REST API and require the `rest-client`
 ruby gem installed:
 
-  package { 'rest-client':
-    ensure => 'present',
-    provider => 'gem'
-  }
+    package { 'rest-client':
+      ensure => 'present',
+      provider => 'gem'
+    }
 
 With that in place, the only caveat for now is that each defined type declaration must include the API URL, admin username and password until I can work out a better way of handling authorisation.
 

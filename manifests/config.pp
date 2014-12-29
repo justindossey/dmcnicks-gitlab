@@ -25,7 +25,7 @@
 # Copyright 2014 David McNicol
 #
 
-class gitlab::install (
+class gitlab::config (
   $default_password,
   $api_login,
   $api_password,
