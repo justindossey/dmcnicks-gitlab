@@ -97,7 +97,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
       users = JSON.parse(response)
       users.each do |user|
         if user['username'] == resource[:username]
-          return user['id']
+          return user['id'].to_s
         end
       end
       return nil
