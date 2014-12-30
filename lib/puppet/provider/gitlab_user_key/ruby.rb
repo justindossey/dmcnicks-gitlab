@@ -104,7 +104,6 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
           keys.each do |key|
             if key['title'] == name
-              puts "FOUND KEY"
               foundkey = key.dup
             end
           end
@@ -113,6 +112,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
         if foundkey
 
+          puts "FOUND KEY"
           # If we have found the user and have a key to add, set the properties
           # and mark :ensure as :present.
 
@@ -129,6 +129,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
         else
   
+          puts "NOT FOUND KEY"
           # If no key has been found, mark :ensure as :absent.
 
           resource.provider = new(:ensure => :absent)
@@ -140,6 +141,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
       end
 
     end
+    puts "FINISHED PREFETCH"
 
   end
 
@@ -147,6 +149,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
   def flush
 
+    puts "STARTING FLUSH"
     # Work out whether the gitlab_user_key resource should be created,
     # destroyed or updated by comparing the @property_hash as it is now with
     # the @old_properties hash that was duped when the provider was created.
