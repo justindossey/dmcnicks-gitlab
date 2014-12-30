@@ -84,13 +84,13 @@ Puppet::Type.type(:gitlab_project).provide(
 
         properties = {
           :ensure       => :present,
-          :namespace    => get_namespace(foundproject['namespace_id'])
+          :namespace    => foundproject['namespace']['name']
         }
 
         if properties[:namespace]
           puts "NAMESPACE " << properties[:namespace]
         else
-          puts "NAMESPACE NOT FOUND"
+          puts "NAMESPACE NOT FOUND "
         end
 
         resource.provider = new(properties)
@@ -172,56 +172,9 @@ Puppet::Type.type(:gitlab_project).provide(
     name.downcase.gsub(/[^a-z0-9]+/, '-').sub(/^-/, '').sub(/-$/, '')
   end
 
-
-  # Returns the name of the namespace with the given ID. For projects, a
-  # namespace can either be a group or an individual user so both have to
-  # be searched for. Note that this is a class method because it is required
-  # in the prefetch class method.
-
-  def self.get_namespace(id)
-
-    params = {
-      :private_token => self.private_token
-    }
-
-    # Check if the id matches any groups.
-
-    uri = '/groups'
-    response = RestClient.get(self.api_url + uri, params)
-
-    if response.code == 200
-      groups = JSON.parse(response)
-      groups.each do |group|
-        if group['id'] == id
-          return group['name']
-        end
-      end
-    end
-
-    # Check if the id matches any users.
-
-    uri = '/users'
-    response = RestClient.get(self.api_url + uri, params)
-
-    if response.code == 200
-      users = JSON.parse(response)
-      users.each do |user|
-        if user['id'] == id
-          return user['name']
-        end
-      end
-    end
-
-    # If neither, return nil.
-
-    return nil
-
-  end
-
   # Returns the ID of the namespace with the given name. For projects, a
   # namespace can either be a group or an individual user so both have to
-  # be searched for. Note that this is an instance method because it is 
-  # required by the flush method.
+  # be searched for.
 
   def get_namespace_id(name)
 
