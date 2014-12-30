@@ -19,21 +19,6 @@ Puppet::Type.type(:gitlab_session).provide(
     end
   end  
 
-  # Create a new gitlab_session provider.
-  
-  def initialize(token, url, *args)
-
-    # Set the private_token and api_url class variables.
-  
-    self.class.private_token = token
-    self.class.api_url = url
-
-    # Pass the rest of the arguments to the parent.
-
-    super(*args)
-
-  end
-
   # Prefetch resource data for all declared gitlab_session resources.
  
   def self.prefetch(resources)
@@ -67,23 +52,19 @@ Puppet::Type.type(:gitlab_session).provide(
         session = JSON.parse(response)
         token = session['private_token']
 
-        resource.provider = new(token, url, :ensure => :present)
+        self.class.private_token = token
+        self.class.api_url = url
+
+        resource.provider = new(:ensure => :absent)
 
       else
 
-        # Otherwise, create a new provider marked as absent.
- 
-        resource.provider = new(nil, nil, :ensure => :present)
+        resource.provider = new(:ensure => :present)
 
       end
 
     end
 
-  end
-
-  # Flush does not do anything because the gitlab_session has no properties.
-
-  def flush
   end
 
 end
