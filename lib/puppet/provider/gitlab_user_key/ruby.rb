@@ -19,17 +19,16 @@ Puppet::Type.type(:gitlab_user_key).provide(
     end
   end  
 
-  # Store the fromuser, user ID and key ID parameters as instance variables.
+  # Store the user ID and key ID parameters as instance variables.
 
-  attr_reader :fromuser, :user_id, :key_id
+  attr_reader :user_id, :key_id
 
   # Create a new gitlab_user_key provider.
 
-  def initialize(fromuser, user_id, key_id, *args)
+  def initialize(user_id, key_id, *args)
 
     # Store the parameters in instance variables.
 
-    @fromuser = fromuser
     @user_id = user_id
     @key_id = key_id
 
@@ -119,19 +118,13 @@ Puppet::Type.type(:gitlab_user_key).provide(
             :key      => key['key']
           }
 
-          resource.provider = new(resource['fromuser'],
-                                  founduser['id'],
-                                  foundkey['id'],
-                                  properties)
+          resource.provider = new(founduser['id'], foundkey['id'], properties)
 
         else
   
           # If no key has been found, mark :ensure as :absent.
 
-          resource.provider = new(resource['fromuser'],
-                                  founduser['id'],
-                                  nil,
-                                  :ensure => :absent)
+          resource.provider = new(founduser['id'], nil, :ensure => :absent)
 
         end
 
@@ -169,14 +162,6 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
     when :present
 
-      # Fetch the key.
-
-      key = @property_hash[:key]
-
-      if ! key
-        key = key_from_user
-      end
-
       if @old_properties[:ensure] == :absent
 
         # If the gitlab_user_key resource is now marked as present but was
@@ -185,7 +170,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
         params = {
           :private_token => self.class.private_token,
           :title         => @property_hash[:title],
-          :key           => key
+          :key           => @property_hash[:key]
         }
 
         uri = "/users/%s/keys" % user_id
@@ -194,11 +179,11 @@ Puppet::Type.type(:gitlab_user_key).provide(
       else
 
         # If the gitlab_user_key resource is now marked as present and it was
-        # previously marked as present too then update the key in Gitlab. This
-        # is done by deleting the existing key entry and creating a new one so
-        # it is only done if the new key is different from the old one.
+        # previously marked as present too then update the key in Gitlab if any
+        # properties have changed. This is done by deleting the existing key
+        # entry and creating a new one.
 
-        if key != @old_properties[:key] && user_id && key_id
+        if changed? && user_id && key_id
 
           # First delete the key.
 
@@ -214,7 +199,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
           params = {
             :private_token => self.class.private_token,
             :title         => @property_hash[:title],
-            :key           => key
+            :key           => @property_hash[:key]
           }
 
           uri = "/users/%s/keys" % user_id
@@ -226,33 +211,13 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
     end
 
-    # Finally, clear the property hash now that it has been flushed.
-
-    @property_hash.clear
-
   end
 
-  # Fetches a public key from the @fromuser's home directory on the local
-  # filesystem.
+  # Returns true if any of the properties have changed.
 
-  def key_from_user
-
-    if homedir = Dir.home(fromuser)
-
-      keyfile = File.join(homedir, '.ssh', 'id_rsa.pub')
-
-      if ! File.exists?(keyfile)
-        keyfile = File.join(homedir, '.ssh', 'id_dsa.pub')
-      end
-
-      if File.exists?(keyfile)
-        return File.open(keyfile).read.chomp
-      end
-
-    end
-
-    return nil
-
+  def changed?
+    return (@property_hash[:title] != @old_properties[:title] or
+            @property_hash[:key] != @old_properties[:key])
   end
 
 end

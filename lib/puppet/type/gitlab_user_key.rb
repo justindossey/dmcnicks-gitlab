@@ -4,9 +4,11 @@ Puppet::Type.newtype(:gitlab_user_key) do
 
   ensurable
 
-  # Properties.
+  newparam(:name) do
+    desk 'The name of the resource'
+  end
 
-  newproperty(:title, :namevar => true) do
+  newproperty(:title) do
     desc 'The title of the user key'
     validate do |value|
       unless value =~ /^[\w@\.\-_ ]+$/
@@ -24,8 +26,6 @@ Puppet::Type.newtype(:gitlab_user_key) do
     end
   end
 
-  # Required parameters.
-
   newparam(:session) do
     desc 'The Gitlab API session to be associated with'
   end
@@ -39,26 +39,9 @@ Puppet::Type.newtype(:gitlab_user_key) do
     end
   end
 
-  # Optional parameters.
-
-  newparam(:fromuser) do
-    desc 'Username to fetch public key from'
-    validate do |value|
-      unless value =~ /^[a-z0-9]+$/
-        raise ArgumentError , "%s is not a user name" % value
-      end
-    end
-  end
-
   validate do
-    unless self[:key] or self[:fromuser]
-      raise Puppet::Error, "either a key or fromuser must be specified"
-    end
-    unless self[:username]
-      raise Puppet::Error, "username is required"
-    end
-    unless self[:session]
-      raise Puppet::Error, "session is required"
+    unless self[:title] && self[:key] && self[:session] && self[:username]
+      raise Puppet::Error, "title, key, session and username  are required"
     end
   end
 

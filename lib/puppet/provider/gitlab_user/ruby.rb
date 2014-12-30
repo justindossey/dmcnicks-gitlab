@@ -173,10 +173,6 @@ Puppet::Type.type(:gitlab_user).provide(
 
     end
 
-    # Finally, clear the property hash now that it has been flushed.
-
-    @property_hash.clear
-
   end
 
 end
