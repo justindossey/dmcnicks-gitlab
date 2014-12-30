@@ -40,7 +40,7 @@ Puppet::Type.newtype(:gitlab_user) do
   end
 
   autorequire(:gitlab_session) do
-    self[:session]
+    [ self[:session] ]
   end
 
   validate do
