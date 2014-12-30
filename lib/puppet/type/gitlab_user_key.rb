@@ -6,13 +6,9 @@ Puppet::Type.newtype(:gitlab_user_key) do
 
   newparam(:name) do
     desc 'The name of the resource'
-  end
-
-  newproperty(:title) do
-    desc 'The title of the user key'
     validate do |value|
       unless value =~ /^[\w@\.\-_ ]+$/
-        raise ArgumentError , "%s is not a valid user key title" % value
+        raise ArgumentError , "%s is not a valid user key name" % value
       end
     end
   end
@@ -40,8 +36,8 @@ Puppet::Type.newtype(:gitlab_user_key) do
   end
 
   validate do
-    unless self[:title] && self[:key] && self[:session] && self[:username]
-      raise Puppet::Error, "title, key, session and username  are required"
+    unless self[:key] && self[:session] && self[:username]
+      raise Puppet::Error, "key, session and username are required"
     end
   end
 
