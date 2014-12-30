@@ -63,8 +63,6 @@ Puppet::Type.type(:gitlab_user).provide(
  
     resources.each do |name, resource|
  
-      puts "USERNAME: " << name
-
       # Find the user record. 
       
       founduser = nil
