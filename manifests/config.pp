@@ -69,7 +69,7 @@ class gitlab::config (
   # Associate the root user public key with the Gitlab root user.
 
   gitlab_user_key { 'root-key':
-    ensure       => 'present',
+    ensure       => 'absent',
     session      => 'config',
     username     => 'root',
     title        => 'myrootkey',
