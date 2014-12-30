@@ -1,5 +1,6 @@
 require 'puppet/provider/gitlab'
 require 'json'
+require 'pp'
 
 Puppet::Type.type(:gitlab_deploy_key).provide(
   :ruby,
@@ -175,6 +176,8 @@ Puppet::Type.type(:gitlab_deploy_key).provide(
         }
 
         uri = "/projects/%s/keys" % project_id
+        puts "URI " << uri
+        pp params
         RestClient.post(self.class.api_url + uri, params)
 
       else
