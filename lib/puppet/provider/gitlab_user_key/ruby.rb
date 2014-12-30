@@ -220,6 +220,8 @@ Puppet::Type.type(:gitlab_user_key).provide(
           uri = "/users/%s/keys" % user_id
           RestClient.post(self.class.api_url + uri, params)
 
+        end
+
       end
 
     end
