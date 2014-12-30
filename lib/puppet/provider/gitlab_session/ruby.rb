@@ -25,8 +25,8 @@ Puppet::Type.type(:gitlab_session).provide(
 
     # Set the private_token and api_url class variables.
   
-    self.private_token = token
-    self.api_url = url
+    self.class.private_token = token
+    self.class.api_url = url
 
     super
 

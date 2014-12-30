@@ -122,11 +122,11 @@ Puppet::Type.type(:gitlab_user).provide(
         # previously marked as present then delete it from Gitlab.
 
         params = {
-          :private_token => self.private_token
+          :private_token => self.class.private_token
         }
 
         uri = '/users/%s' % @old_properties[:id]
-        RestClient.delete(self.api_url + uri, params)
+        RestClient.delete(self.class.api_url + uri, params)
 
       end
 
@@ -138,7 +138,7 @@ Puppet::Type.type(:gitlab_user).provide(
         # previously marked as absent then create it in Gitlab.
  
         params = {
-          :private_token => this.private_token,
+          :private_token => self.class.private_token,
           :username      => @property_hash[:username],
           :password      => @property_hash[:password],
           :email         => @property_hash[:email],
@@ -146,7 +146,7 @@ Puppet::Type.type(:gitlab_user).provide(
         }
 
         uri = '/users'
-        RestClient.post(this.api_url + uri, params)
+        RestClient.post(self.class.api_url + uri, params)
 
       else
 
@@ -155,17 +155,15 @@ Puppet::Type.type(:gitlab_user).provide(
         # in Gitlab.
 
         params = {
-          :private_token => this.private_token,
+          :private_token => self.class.private_token,
         }
 
         params[:password] = @property_hash[:password] if @property_hash[:password]
-
         params[:email] = @property_hash[:email] if @property_hash[:email]
-
         params[:name] = @property_hash[:fullname] if @property_hash[:fullname]
 
         uri = '/users/%s' % @old_properties[:id]
-        RestClient.put(this.api_url + uri, params)
+        RestClient.put(self.class.api_url + uri, params)
 
       end
 
