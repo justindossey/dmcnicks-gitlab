@@ -1,6 +1,5 @@
 require 'puppet/provider/gitlab'
 require 'json'
-require 'pp'
 
 Puppet::Type.type(:gitlab_user_key).provide(
   :ruby,
@@ -94,7 +93,6 @@ Puppet::Type.type(:gitlab_user_key).provide(
         if response.code == 200
 
           keys = JSON.parse(response)
-          pp keys
 
           keys.each do |key|
             if key['title'] == resource[:title]
@@ -111,8 +109,8 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
           properties = {
             :ensure   => :present,
-            :title    => key['title'],
-            :key      => key['key']
+            :title    => foundkey['title'],
+            :key      => foundkey['key']
           }
 
           resource.provider = new(properties)
@@ -144,16 +142,12 @@ Puppet::Type.type(:gitlab_user_key).provide(
     # destroyed or updated by comparing the @property_hash as it is now with
     # the @old_properties hash that was duped when the provider was created.
 
-    if @property_hash[:ensure]
-      puts "ENSURE IS " << @property_hash[:ensure].to_s
-    end
     case @property_hash[:ensure]
 
     when :absent
 
       if @old_properties[:ensure] == :present
 
-        puts "DELETING"
         # If the gitlab_user_key resource is now marked as absent but was
         # previously marked as present then delete it from Gitlab.
 
@@ -170,7 +164,6 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
       if @old_properties[:ensure] == :absent
 
-        puts "CREATING"
         # If the gitlab_user_key resource is now marked as present but was
         # previously marked as absent then create it in Gitlab.
  
@@ -190,8 +183,6 @@ Puppet::Type.type(:gitlab_user_key).provide(
         # properties have changed. This is done by deleting the existing key
         # entry and creating a new one.
 
-        puts "MODIFYING"
-
         if changed? && user_id && key_id
 
           # First delete the key.
@@ -199,8 +190,6 @@ Puppet::Type.type(:gitlab_user_key).provide(
           params = {
             :private_token => self.class.private_token
           }
-
-          puts "DELETING KEY"
 
           uri = '/users/%s/keys/%s' % [ user_id, key_id ]
           RestClient.delete(self.class.api_url + uri, params)
@@ -212,8 +201,6 @@ Puppet::Type.type(:gitlab_user_key).provide(
             :title         => @property_hash[:title],
             :key           => @property_hash[:key]
           }
-
-          puts "CREATING KEY"
 
           uri = "/users/%s/keys" % user_id
           RestClient.post(self.class.api_url + uri, params)
