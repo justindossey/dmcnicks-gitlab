@@ -128,7 +128,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
             :ensure => :absent
           }
 
-          resource.provider = new(founduser['id'], nil, properties)
+          resource.provider = new(founduser['id'], 0, properties)
 
         end
 
