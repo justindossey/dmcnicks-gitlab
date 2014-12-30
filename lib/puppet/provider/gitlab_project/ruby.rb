@@ -192,7 +192,7 @@ Puppet::Type.type(:gitlab_project).provide(
   def get_namespace(id)
 
     params = {
-      :private_token => self.private_token
+      :private_token => self.class.private_token
     }
 
     # Check if the id matches any groups.
@@ -236,7 +236,7 @@ Puppet::Type.type(:gitlab_project).provide(
   def get_namespace_id(name)
 
     params = {
-      :private_token => self.private_token
+      :private_token => self.class.private_token
     }
 
     # Check if the id matches any groups.
