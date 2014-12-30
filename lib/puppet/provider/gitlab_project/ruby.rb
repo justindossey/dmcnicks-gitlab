@@ -87,12 +87,6 @@ Puppet::Type.type(:gitlab_project).provide(
           :namespace    => foundproject['namespace']['name']
         }
 
-        if properties[:namespace]
-          puts "NAMESPACE " << properties[:namespace]
-        else
-          puts "NAMESPACE NOT FOUND "
-        end
-
         resource.provider = new(properties)
 
         resource.provider.project_id = foundproject['id']
