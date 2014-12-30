@@ -25,10 +25,6 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
   # Create a new gitlab_user_key provider.
 
-  def initialize(arg)
-    super(arg)
-  end
-
   def initialize(user_id, key_id, *args)
 
     # Store the parameters in instance variables.
@@ -128,7 +124,11 @@ Puppet::Type.type(:gitlab_user_key).provide(
   
           # If no key has been found, mark :ensure as :absent.
 
-          resource.provider = new(founduser['id'], nil, :ensure => :absent)
+          properties = {
+            :ensure => :absent
+          }
+
+          resource.provider = new(founduser['id'], nil, properties)
 
         end
 
