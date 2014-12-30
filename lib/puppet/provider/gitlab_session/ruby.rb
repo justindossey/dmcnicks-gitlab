@@ -30,45 +30,32 @@ Puppet::Type.type(:gitlab_session).provide(
 
     resources.each do |name, resource|
   
-      pp name
-      pp resource
-
-      # Perform a login to the API and fetch the returned private token.
+      # Login to the API.
       
-      token = nil
-      url = resource[:api_url]
-
       params = {
         :login    => resource[:api_login],
         :password => resource[:api_password]
       }
 
-      pp url
-      pp params
-
       result = {}
 
       uri = '/session'
-      response = RestClient.post(url + uri, params)
+      response = RestClient.post(resource[:api_url] + uri, params)
+
+      # Set the private token and API URL if logged in successfully.
 
       if response.code == 201
 
-        # If logged in, create a new provider containing the private token,
-        # API URL and mark it as present.
-
         session = JSON.parse(response)
-        token = session['private_token']
 
-        self.class.private_token = token
-        self.class.api_url = url
-
-        resource.provider = new(:ensure => :absent)
-
-      else
-
-        resource.provider = new(:ensure => :present)
+        self.private_token = session['private_token']
+        self.api_url = resource[:api_url]
 
       end
+
+      # Create the new resource.
+
+      resource.provider = new
 
     end
 
