@@ -28,7 +28,9 @@ Puppet::Type.type(:gitlab_session).provide(
     self.class.private_token = token
     self.class.api_url = url
 
-    super(*args)
+    empty_properties = {}
+
+    super(empty_properties)
 
   end
 
