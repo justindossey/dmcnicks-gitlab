@@ -19,7 +19,7 @@ Puppet::Type.type(:gitlab_user).provide(
     end
   end  
 
-  # Creates a new gitlab_user provider.
+  # Create a new gitlab_user provider.
 
   def initialize(properties)
 
