@@ -151,16 +151,24 @@ Puppet::Type.type(:gitlab_user).provide(
       else
 
         # If the gitlab_user resource is now marked as present and it was
-        # previously marked as present then update any changed properties
+        # previously marked as present too then update any changed properties
         # in Gitlab.
 
         params = {
           :private_token => self.class.private_token,
         }
 
-        params[:password] = @property_hash[:password] if @property_hash[:password]
-        params[:email] = @property_hash[:email] if @property_hash[:email]
-        params[:name] = @property_hash[:fullname] if @property_hash[:fullname]
+        if @property_hash[:password]
+          params[:password] = @property_hash[:password]
+        end
+
+        if @property_hash[:email]
+          params[:email] = @property_hash[:email]
+        end
+
+        if @property_hash[:fullname]
+          params[:name] = @property_hash[:fullname]
+        end
 
         uri = '/users/%s' % @old_properties[:id]
         RestClient.put(self.class.api_url + uri, params)
