@@ -31,8 +31,6 @@ Puppet::Type.type(:gitlab_user).provide(
     # user before manifests make changes. This will be used in the flush
     # method to work out what has changed.
     
-    puts "PROVIDER INITIALIZED, ENSURE: " << @property_hash[:ensure]
-
     @old_properties = @property_hash.dup
 
   end
@@ -82,20 +80,15 @@ Puppet::Type.type(:gitlab_user).provide(
         # If a user has been found, create a provider with :ensure set to
         # :present and the user details. 
 
-#        properties = {
-#          :ensure   => :present,
-#          :id       => founduser['id'],
-#          :username => founduser['username'],
-#          :email    => founduser['email'],
-#          :fullname => founduser['name']
-#        }
+        properties = {
+          :ensure   => :present,
+          :id       => founduser['id'],
+          :username => founduser['username'],
+          :email    => founduser['email'],
+          :fullname => founduser['name']
+        }
 
-        resource.provider = new(:ensure => :present,
-                                :id => founduser['id'],
-                                :username => founduser['username'],
-                                :email    => founduser['email'],
-                                :fullname => founduser['name']
-                               )
+        resource.provider = new(properties)
 
       else
 
