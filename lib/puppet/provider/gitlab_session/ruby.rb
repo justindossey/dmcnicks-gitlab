@@ -3,8 +3,8 @@ require 'json'
 require 'pp'
 
 Puppet::Type.type(:gitlab_session).provide(
-    :rubyone,
-      :parent => Puppet::Provider::Gitlab
+  :ruby,
+  :parent => Puppet::Provider::Gitlab
 ) do
 
   desc 'Default provider for gitlab_session type'
