@@ -30,7 +30,7 @@ Puppet::Type.type(:gitlab_session).provide(
 
     # Pass the rest of the arguments to the parent.
 
-    super(*args)
+    #super(*args)
 
   end
 
