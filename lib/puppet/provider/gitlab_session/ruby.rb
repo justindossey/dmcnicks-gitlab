@@ -21,14 +21,14 @@ Puppet::Type.type(:gitlab_session).provide(
 
   # Create a new gitlab_session provider.
   
-  def initialize(token, url)
+  def initialize(token, url, *args)
 
     # Set the private_token and api_url class variables.
   
     self.class.private_token = token
     self.class.api_url = url
 
-    super
+    super(*args)
 
   end
 

@@ -21,11 +21,11 @@ Puppet::Type.type(:gitlab_user).provide(
 
   # Create a new gitlab_user provider.
 
-  def initialize(properties)
+  def initialize(*args)
 
     # Pass the properties onto the parent class.
 
-    super(properties)
+    super(*args)
 
     # Duplicate the property_hash so we have a record of the state of the
     # user before manifests make changes. This will be used in the flush
