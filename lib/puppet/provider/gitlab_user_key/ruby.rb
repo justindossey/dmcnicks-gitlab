@@ -144,7 +144,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
     # the @old_properties hash that was duped when the provider was created.
 
     if @property_hash[:ensure]
-      puts "ENSURE IS " << @property_hash[:ensure]
+      puts "ENSURE IS " << @property_hash[:ensure].to_s
     end
     case @property_hash[:ensure]
 
