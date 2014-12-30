@@ -5,7 +5,7 @@ Puppet::Type.newtype(:gitlab_user_key) do
   ensurable
 
   newparam(:name) do
-    desk 'The name of the resource'
+    desc 'The name of the resource'
   end
 
   newproperty(:title) do
