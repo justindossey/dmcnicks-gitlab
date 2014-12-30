@@ -2,7 +2,7 @@ require 'puppet/provider/gitlab'
 require 'json'
 
 Puppet::Type.type(:gitlab_user_key).provide(
-  :rubyeight,
+  :ruby,
   :parent => Puppet::Provider::Gitlab
 ) do
 
@@ -114,6 +114,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
           }
 
           resource.provider = new(properties)
+
           resource.provider.user_id = founduser['id']
           resource.provider.key_id = foundkey['id']
 
@@ -122,6 +123,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
           # If no key has been found, mark :ensure as :absent.
 
           resource.provider = new(:ensure => :absent)
+
           resource.provider.user_id = founduser['id']
 
         end
