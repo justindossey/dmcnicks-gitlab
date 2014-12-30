@@ -4,6 +4,11 @@ Puppet::Type.newtype(:gitlab_session) do
 
   newparam(:session, :namevar => true) do
     desc 'The name of this Gitlab session'
+    validate do |value|
+      unless value =~ /^[\w\-_ ]+$/
+        raise ArgumentError , "%s is not a valid session name" % value
+      end
+    end
   end
 
   newparam(:api_url) do

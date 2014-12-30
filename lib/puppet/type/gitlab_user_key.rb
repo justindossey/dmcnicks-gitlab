@@ -24,6 +24,11 @@ Puppet::Type.newtype(:gitlab_user_key) do
 
   newparam(:session) do
     desc 'The Gitlab API session to be associated with'
+    validate do |value|
+      unless value =~ /^[\w\-_ ]+$/
+        raise ArgumentError , "%s is not a valid session name" % value
+      end
+    end
   end
 
   newparam(:username) do
