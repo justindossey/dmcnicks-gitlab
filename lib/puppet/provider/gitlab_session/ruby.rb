@@ -1,5 +1,6 @@
 require 'puppet/provider/gitlab'
 require 'json'
+require 'pp'
 
 Puppet::Type.type(:gitlab_session).provide(
     :rubyone,
@@ -29,6 +30,9 @@ Puppet::Type.type(:gitlab_session).provide(
 
     resources.each do |name, resource|
   
+      pp name
+      pp resource
+
       # Perform a login to the API and fetch the returned private token.
       
       token = nil
@@ -38,6 +42,9 @@ Puppet::Type.type(:gitlab_session).provide(
         :login    => resource[:api_login],
         :password => resource[:api_password]
       }
+
+      pp url
+      pp params
 
       result = {}
 
