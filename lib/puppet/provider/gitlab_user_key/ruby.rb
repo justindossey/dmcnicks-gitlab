@@ -25,7 +25,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
   # Create a new gitlab_user_key provider.
 
-  def initialize(user_id, key_id, three, four, *args)
+  def initialize(user_id, key_id, *args)
 
     # Store the parameters in instance variables.
 
