@@ -68,7 +68,7 @@ class gitlab::config (
 
   # Associate the root user public key with the Gitlab root user.
 
-  gitlab_user_key { 'otherkey':
+  gitlab_user_key { 'thirdkey':
     ensure       => 'present',
     session      => 'config',
     username     => 'root',
