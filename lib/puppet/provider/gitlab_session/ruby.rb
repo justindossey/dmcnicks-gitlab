@@ -22,17 +22,17 @@ Puppet::Type.type(:gitlab_session).provide(
   end  
 
   def prefetch(newresources)
-    @@api_url = newresources[:api_url]
+    api_url = newresources[:api_url]
     params = {
       :login    => newresources[:api_login],
       :password => newresourcase[:api_password]
     }
     uri = '/session'
-    response = RestClient.post(@@api_url + uri, params)
+    response = RestClient.post(api_url + uri, params)
     if response.code == 201
       session = JSON.parse(response)
-      @@token = session['private_token']
-      puts "LOL " << @@token
+      token = session['private_token']
+      puts "LOL " << token
     end
   end
 end

@@ -23,22 +23,22 @@ Puppet::Type.type(:gitlab_user).provide(
 
   def create
     params = {
-      :private_token => @@token,
+      :private_token => token,
       :username      => resource[:username],
       :password      => resource[:password],
       :email         => resource[:email],
       :name          => resource[:fullname]
     }
     uri = '/users'
-    RestClient.post(@@api_url + uri, params)
+    RestClient.post(api_url + uri, params)
   end
 
   def destroy
     params = {
-      :private_token => @@token
+      :private_token => token
     }
     uri = '/users/%s' % user['id']
-    RestClient.delete(@@api_url + uri, params)
+    RestClient.delete(api_url + uri, params)
   end
 
   def exists?
@@ -90,7 +90,7 @@ Puppet::Type.type(:gitlab_user).provide(
 
   def flush
     params = {
-      :private_token => @@token
+      :private_token => token
     }
     properties = [ :email, :fullname, :password ]
     properties.each do |property|
@@ -99,7 +99,7 @@ Puppet::Type.type(:gitlab_user).provide(
       end
     end
     uri = '/users/%s' % user['id']
-    RestClient.put(@@api_url + uri, params)
+    RestClient.put(api_url + uri, params)
     @property_hash.clear
   end
 
@@ -107,10 +107,10 @@ Puppet::Type.type(:gitlab_user).provide(
  
   def user(username = resource[:username])
     params = {
-      :private_token => @@token
+      :private_token => token
     }
     uri = '/users'
-    response = RestClient.get(@@api_url + uri, params)
+    response = RestClient.get(api_url + uri, params)
     if response.code == 200
       users = JSON.parse(response)
       users.each do |user|
