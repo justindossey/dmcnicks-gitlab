@@ -37,7 +37,7 @@ Puppet::Type.type(:gitlab_user).provide(
     params = {
       :private_token => Puppet::Provider::Gitlab.token
     }
-    uri = '/users/%s' % user['id']
+    uri = '/users/%s' % user_id
     RestClient.delete(Puppet::Provider::Gitlab.api_url + uri, params)
   end
 
@@ -75,13 +75,13 @@ Puppet::Type.type(:gitlab_user).provide(
 
   def flush
     @property_hash[:private_token] = Puppet::Provider::Gitlab.token
-    uri = '/users/%s' % user['id']
+    uri = '/users/%s' % user_id
     RestClient.put(Puppet::Provider::Gitlab.api_url + uri, @property_hash)
   end
 
   # Retrieve the user record.
  
-  def user
+  def user_id
     params = {
       :private_token => Puppet::Provider::Gitlab.token
     }
@@ -91,7 +91,7 @@ Puppet::Type.type(:gitlab_user).provide(
       users = JSON.parse(response)
       users.each do |user|
         if user['username'] == resource[:username]
-          return user
+          return user['id'].to_s
         end
       end
       return nil
