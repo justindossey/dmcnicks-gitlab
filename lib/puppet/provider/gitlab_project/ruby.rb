@@ -149,34 +149,15 @@ Puppet::Type.type(:gitlab_project).provide(
         uri = '/projects'
         RestClient.post(self.class.api_url + uri, params)
 
-      else
-
-        # If the gitlab_project resource is now marked as present and it was
-        # previously marked as present too then update any changed properties
-        # in Gitlab.
-
-        if changed?
-
-          params = {
-            :private_token => self.class.private_token,
-            :namespace_id  => get_namespace_id(@property_hash[:namespace])
-          }
-
-          uri = '/projects/%s' % project_id
-          RestClient.put(self.class.api_url + uri, params)
-
-        end
+        # Projects do not have modifiable properties so there is no third
+        # option of modifying an existing resource here. It would be nice if
+        # we could change the project namespace but the API does not support
+        # it.
 
       end
 
     end
 
-  end
-
-  # Returns true if any of the properties have changed.
-
-  def changed?
-    return @property_hash[:namespace] != @old_properties[:namespace]
   end
 
   # Returns a path slug created from the given name.
