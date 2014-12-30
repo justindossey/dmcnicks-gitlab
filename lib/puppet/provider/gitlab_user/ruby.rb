@@ -76,6 +76,7 @@ Puppet::Type.type(:gitlab_user).provide(
   # Prefetch properties.
 
   def prefetch(newresources)
+    puts "In gitlab_user prefetch"
     user = user(newresources[:username])
     user.symbolize_keys
     properties = [ :email, :fullname, :password ]

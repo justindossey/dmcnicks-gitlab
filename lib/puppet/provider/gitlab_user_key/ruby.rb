@@ -22,6 +22,8 @@ Puppet::Type.type(:gitlab_user_key).provide(
   end  
 
   def create
+    puts "In gitlab_user create"
+
     params = {
       :private_token => token,
       :title         => resource[:title],
@@ -40,6 +42,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
   end
 
   def exists?
+    puts "In gitlab_user exists?"
     return key_id != nil
   end
 

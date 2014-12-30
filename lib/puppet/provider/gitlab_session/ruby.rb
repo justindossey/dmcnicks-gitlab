@@ -22,6 +22,7 @@ Puppet::Type.type(:gitlab_session).provide(
   end  
 
   def prefetch(newresources)
+    puts "In gitlab_session prefetch"
     api_url = newresources[:api_url]
     params = {
       :login    => newresources[:api_login],
