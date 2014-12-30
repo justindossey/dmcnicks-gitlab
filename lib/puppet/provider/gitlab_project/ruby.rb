@@ -198,7 +198,7 @@ Puppet::Type.type(:gitlab_project).provide(
     # Check if the id matches any groups.
 
     uri = '/groups'
-    response = RestClient.get(self.api_url + uri, params)
+    response = RestClient.get(self.class.api_url + uri, params)
 
     if response.code == 200
       groups = JSON.parse(response)
@@ -212,7 +212,7 @@ Puppet::Type.type(:gitlab_project).provide(
     # Check if the id matches any users.
 
     uri = '/users'
-    response = RestClient.get(self.api_url + uri, params)
+    response = RestClient.get(self.class.api_url + uri, params)
 
     if response.code == 200
       users = JSON.parse(response)
@@ -242,7 +242,7 @@ Puppet::Type.type(:gitlab_project).provide(
     # Check if the id matches any groups.
 
     uri = '/groups'
-    response = RestClient.get(self.api_url + uri, params)
+    response = RestClient.get(self.class.api_url + uri, params)
 
     if response.code == 200
       groups = JSON.parse(response)
@@ -256,7 +256,7 @@ Puppet::Type.type(:gitlab_project).provide(
     # Check if the id matches any users.
 
     uri = '/users'
-    response = RestClient.get(self.api_url + uri, params)
+    response = RestClient.get(self.class.api_url + uri, params)
 
     if response.code == 200
       users = JSON.parse(response)
