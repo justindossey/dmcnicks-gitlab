@@ -21,16 +21,11 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
   # Store the user ID and key ID parameters as instance variables.
 
-  attr_reader :user_id, :key_id
+  attr_accessor :user_id, :key_id
 
   # Create a new gitlab_user_key provider.
 
-  def initialize(user_id, key_id, *args)
-
-    # Store the parameters in instance variables.
-
-    @user_id = user_id
-    @key_id = key_id
+  def initialize(*args)
 
     # Pass the properties onto the parent class.
 
@@ -118,17 +113,16 @@ Puppet::Type.type(:gitlab_user_key).provide(
             :key      => key['key']
           }
 
-          resource.provider = new(founduser['id'], foundkey['id'], properties)
+          resource.provider = new(properties)
+          resource.provider.user_id = founduser['id']
+          resource.provider.key_id = foundkey['id']
 
         else
   
           # If no key has been found, mark :ensure as :absent.
 
-          properties = {
-            :ensure => :absent
-          }
-
-          resource.provider = new(founduser['id'], 0, properties)
+          resource.provider = new(:ensure => :absent)
+          resource.provider.user_id = founduser['id']
 
         end
 
