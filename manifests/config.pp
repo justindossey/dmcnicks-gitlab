@@ -61,8 +61,8 @@ class gitlab::config (
 
   gitlab_user { $api_login:
     ensure       => 'present',
-    fullname     => 'Joe Bloggs',
-    require      => Gitlab_session['config']
+    session      => 'config',
+    fullname     => 'Joe Bloggs'
   }
 
   # Generate an SSH keypair for the root user if one does not exist.
@@ -75,8 +75,8 @@ class gitlab::config (
 
   gitlab_user_key { 'root-key':
     ensure       => 'present',
+    session      => 'config',
     username     => 'root',
-    fromuser     => 'root',
-    require      => Gitlab_session['config']
+    fromuser     => 'root'
   }
 }
