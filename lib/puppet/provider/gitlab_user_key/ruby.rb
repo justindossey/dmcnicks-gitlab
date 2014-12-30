@@ -21,7 +21,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
   # Store the user ID and key ID parameters as instance variables.
 
-  attr_accessor :user_id, :key_id
+  attr_accessor :user_id, :key_id, :key_title
 
   # Create a new gitlab_user_key provider.
 
@@ -95,7 +95,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
           keys = JSON.parse(response)
 
           keys.each do |key|
-            if key['title'] == resource[:title]
+            if key['title'] == name
               foundkey = key.dup
             end
           end
@@ -109,7 +109,6 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
           properties = {
             :ensure   => :present,
-            :title    => foundkey['title'],
             :key      => foundkey['key']
           }
 
@@ -117,6 +116,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
           resource.provider.user_id = founduser['id']
           resource.provider.key_id = foundkey['id']
+          resource.provider.key_title = name
 
         else
   
@@ -125,6 +125,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
           resource.provider = new(:ensure => :absent)
 
           resource.provider.user_id = founduser['id']
+          resource.provider.key_title = name
 
         end
 
@@ -169,8 +170,8 @@ Puppet::Type.type(:gitlab_user_key).provide(
  
         params = {
           :private_token => self.class.private_token,
-          :title         => @property_hash[:title],
-          :key           => @property_hash[:key]
+          :key           => @property_hash[:key],
+          :title         => key_title
         }
 
         uri = "/users/%s/keys" % user_id
@@ -183,7 +184,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
         # properties have changed. This is done by deleting the existing key
         # entry and creating a new one.
 
-        if changed? && user_id && key_id
+        if changed? && user_id && key_id && key_title
 
           # First delete the key.
 
@@ -198,8 +199,8 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
           params = {
             :private_token => self.class.private_token,
-            :title         => @property_hash[:title],
-            :key           => @property_hash[:key]
+            :key           => @property_hash[:key],
+            :title         => key_title
           }
 
           uri = "/users/%s/keys" % user_id
@@ -216,8 +217,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
   # Returns true if any of the properties have changed.
 
   def changed?
-    return (@property_hash[:title] != @old_properties[:title] or
-            @property_hash[:key] != @old_properties[:key])
+    return @property_hash[:key] != @old_properties[:key]
   end
 
 end
