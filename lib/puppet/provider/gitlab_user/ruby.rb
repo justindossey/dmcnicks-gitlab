@@ -2,7 +2,7 @@ require 'puppet/provider/gitlab'
 require 'json'
 
 Puppet::Type.type(:gitlab_user).provide(
-  :rubytwo,
+  :ruby,
   :parent => Puppet::Provider::Gitlab
 ) do
 
