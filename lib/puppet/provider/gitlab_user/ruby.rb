@@ -90,9 +90,9 @@ Puppet::Type.type(:gitlab_user).provide(
       # in the flush method.
 
       properties = {
-        :id       => resource[:id]
-        :username => resource[:username]
-        :email    => user[:email]
+        :id       => resource[:id],
+        :username => resource[:username],
+        :email    => user[:email],
         :fullname => user[:name]
       }
 
@@ -129,7 +129,6 @@ Puppet::Type.type(:gitlab_user).provide(
         RestClient.delete(self.api_url + uri, params)
 
       end
-    end
 
     when :present
 
