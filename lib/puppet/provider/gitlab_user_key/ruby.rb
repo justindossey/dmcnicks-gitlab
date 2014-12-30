@@ -1,5 +1,6 @@
 require 'puppet/provider/gitlab'
 require 'json'
+require 'pp'
 
 Puppet::Type.type(:gitlab_user_key).provide(
   :ruby,
@@ -92,6 +93,9 @@ Puppet::Type.type(:gitlab_user_key).provide(
         puts "FETCHING KEYS"
 
         uri = "/users/%s/keys" % founduser['id']
+        puts "URL " << self.api_url
+        puts "URI " << uri
+        pp params
         response = RestClient.get(self.api_url + uri, params)
 
         if response.code == 200
