@@ -2,7 +2,7 @@ require 'puppet/provider/gitlab'
 require 'json'
 
 Puppet::Type.type(:gitlab_user).provide(
-  :ruby,
+  :rubytwo,
   :parent => Puppet::Provider::Gitlab
 ) do
 
@@ -67,35 +67,38 @@ Puppet::Type.type(:gitlab_user).provide(
  
       puts "USERNAME: " << name
 
-      # Find the user record. Start with a properties has that has :ensure set
-      # to :absent. If the user record is found, replace it with a hash
-      # containing the user properties and setting :ensure to :present.
+      # Find the user record. 
       
-      properties = {
-        :ensure => :absent
-      }
+      founduser = nil
 
-      users.each do |u|
-        if u['username'] == resource[:username]
-
-          puts "FOUND USER"
-
-          properties = {
-            :ensure   => :present,
-            :id       => u['id'],
-            :username => u['username'],
-            :email    => u['email'],
-            :fullname => u['name']
-          }
-
+      users.each do |user|
+        if user['username'] == name
+          founduser = user
         end
       end
 
-      # Create a new provider.
+      if founduser
 
-      puts "CREATING PROVIDER, ENSURE: " << properties[:ensure]
- 
-      resource.provider = new(properties)
+        # If a user has been found, create a provider with :ensure set to
+        # :present and the user details. 
+
+        properties = {
+          :ensure   => :present,
+          :id       => founduser['id'],
+          :username => founduser['username'],
+          :email    => founduser['email'],
+          :fullname => founduser['name']
+        }
+
+        resource.provider = new(properties)
+
+      else
+
+        # If not, create a provider with :ensure set to :absent.
+
+        resource.provider = new(:ensure => :absent)
+
+      end
 
     end
 
