@@ -13,6 +13,10 @@ Puppet::Type.newtype(:gitlab_user_key) do
     end
   end
 
+  newparam(:session) do
+    desc 'The Gitlab API session to be associated with'
+  end
+
   newparam(:username) do
     desc 'The name of the user that the key is in'
     validate do |value|
@@ -46,4 +50,13 @@ Puppet::Type.newtype(:gitlab_user_key) do
     end
   end
 
+  autorequire(:gitlab_session) do
+    self[:session]
+  end
+
+  validate do
+    unless self[:session]
+      raise Puppet::Error, "session is required"
+    end
+  end
 end

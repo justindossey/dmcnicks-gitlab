@@ -4,7 +4,7 @@ Puppet::Type.newtype(:gitlab_session) do
 
   ensurable
 
-  newparam(:name) do
+  newparam(:session, :namevar => true) do
     desc 'The name of this Gitlab session'
   end
 
