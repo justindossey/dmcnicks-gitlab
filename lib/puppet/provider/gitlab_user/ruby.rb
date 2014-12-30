@@ -82,15 +82,20 @@ Puppet::Type.type(:gitlab_user).provide(
         # If a user has been found, create a provider with :ensure set to
         # :present and the user details. 
 
-        properties = {
-          :ensure   => :present,
-          :id       => founduser['id'],
-          :username => founduser['username'],
-          :email    => founduser['email'],
-          :fullname => founduser['name']
-        }
+#        properties = {
+#          :ensure   => :present,
+#          :id       => founduser['id'],
+#          :username => founduser['username'],
+#          :email    => founduser['email'],
+#          :fullname => founduser['name']
+#        }
 
-        resource.provider = new(properties)
+        resource.provider = new(:ensure => :present,
+                                :id => founduser['id'],
+                                :username => founduser['username'],
+                                :email    => founduser['email'],
+                                :fullname => founduser['name']
+                               )
 
       else
 
