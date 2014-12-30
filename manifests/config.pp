@@ -82,6 +82,6 @@ class gitlab::config (
   gitlab_project { 'My New Project':
     ensure => 'present',
     session => 'config',
-    namespace => 'Joe Bloggs'
+    namespace => 'My Group'
   }
 }
