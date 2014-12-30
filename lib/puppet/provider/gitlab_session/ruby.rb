@@ -28,9 +28,7 @@ Puppet::Type.type(:gitlab_session).provide(
     self.class.private_token = token
     self.class.api_url = url
 
-    empty_properties = {}
-
-    super(empty_properties)
+    super(*args)
 
   end
 
@@ -54,23 +52,30 @@ Puppet::Type.type(:gitlab_session).provide(
         :password => resource[:api_password]
       }
 
+      result = {}
       uri = '/session'
       response = RestClient.post(url + uri, params)
 
       if response.code == 201
+
+        # If logged in, create a new provider containing the private token,
+        # API url and mark it as present.
+
         session = JSON.parse(response)
         token = session['private_token']
-      end
 
-      # Initialise the provider for this resource.
-      
-      resource.provider = new(token, url)
+        resource.provider = new(token, url, :ensure => :present)
+
+      else
+
+        # Otherwise, create a new provider marked as absent.
+ 
+        resource.provider = new(nil, nil, :ensure => :present)
+
+      end
 
     end
 
   end
-
-  # This provider has no flush method because it has no properties to
-  # flush.
 
 end
