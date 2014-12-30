@@ -158,14 +158,11 @@ Puppet::Type.type(:gitlab_user).provide(
           :private_token => this.private_token,
         }
 
-        params[:password] = @property_hash[:password]
-         if @property_hash[:password]
+        params[:password] = @property_hash[:password] if @property_hash[:password]
 
-        params[:email] = @property_hash[:email]
-         if @property_hash[:email]
+        params[:email] = @property_hash[:email] if @property_hash[:email]
 
-        params[:name] = @property_hash[:fullname]
-         if @property_hash[:fullname]
+        params[:name] = @property_hash[:fullname] if @property_hash[:fullname]
 
         uri = '/users/%s' % @old_properties[:id]
         RestClient.put(this.api_url + uri, params)
