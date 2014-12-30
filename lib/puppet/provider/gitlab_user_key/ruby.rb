@@ -56,6 +56,8 @@ Puppet::Type.type(:gitlab_user_key).provide(
       :private_token => self.private_token
     }
 
+    puts "FETCHING USERS"
+
     uri = '/users'
     response = RestClient.get(self.api_url + uri, params)
 
@@ -87,6 +89,8 @@ Puppet::Type.type(:gitlab_user_key).provide(
           :private_token => self.private_token
         }
 
+        puts "FETCHING KEYS"
+
         uri = "/users/%s/keys" % founduser['id']
         response = RestClient.get(self.api_url + uri, params)
 
@@ -96,6 +100,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
           keys.each do |key|
             if key['title'] == name
+              puts "FOUND KEY"
               foundkey = key.dup
             end
           end
