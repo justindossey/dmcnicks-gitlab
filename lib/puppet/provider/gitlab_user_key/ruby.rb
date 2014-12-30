@@ -183,6 +183,8 @@ Puppet::Type.type(:gitlab_user_key).provide(
         # properties have changed. This is done by deleting the existing key
         # entry and creating a new one.
 
+        puts "PRESENT"
+
         if changed? && user_id && key_id
 
           # First delete the key.
@@ -190,6 +192,8 @@ Puppet::Type.type(:gitlab_user_key).provide(
           params = {
             :private_token => self.class.private_token
           }
+
+          puts "DELETING KEY"
 
           uri = '/users/%s/keys/%s' % [ user_id, key_id ]
           RestClient.delete(self.class.api_url + uri, params)
@@ -201,6 +205,8 @@ Puppet::Type.type(:gitlab_user_key).provide(
             :title         => @property_hash[:title],
             :key           => @property_hash[:key]
           }
+
+          puts "CREATING KEY"
 
           uri = "/users/%s/keys" % user_id
           RestClient.post(self.class.api_url + uri, params)
