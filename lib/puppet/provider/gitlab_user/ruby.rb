@@ -57,7 +57,6 @@ Puppet::Type.type(:gitlab_user).provide(
 
     if response.code == 200
       users = JSON.parse(response)
-      users.symbolize_keys
     end
 
     # Now cycle through each declared resource.
@@ -69,8 +68,8 @@ Puppet::Type.type(:gitlab_user).provide(
       user = {}
 
       users.each do |u|
-        if u[:username] == resource[:username]
-          user = u.symbolize_keys
+        if u['username'] == resource[:username]
+          user = u
         end
       end
 
@@ -90,10 +89,10 @@ Puppet::Type.type(:gitlab_user).provide(
       # in the flush method.
 
       properties = {
-        :id       => resource[:id],
-        :username => resource[:username],
-        :email    => user[:email],
-        :fullname => user[:name]
+        :id       => user['id'],
+        :username => user['username'],
+        :email    => user['email'],
+        :fullname => user['name']
       }
 
       # Create a new provider with the found properties.
