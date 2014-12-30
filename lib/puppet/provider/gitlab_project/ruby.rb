@@ -185,12 +185,13 @@ Puppet::Type.type(:gitlab_project).provide(
     name.downcase.gsub(/[^a-z0-9]+/, '-').sub(/^-/, '').sub(/-$/, '')
   end
 
+
   # Returns the name of the namespace with the given ID. For projects, a
   # namespace can either be a group or an individual user so both have to
   # be searched for. Note that this is a class method because it is required
   # in the prefetch class method.
 
-  self.def get_namespace(id)
+  def self.get_namespace(id)
 
     params = {
       :private_token => self.private_token
