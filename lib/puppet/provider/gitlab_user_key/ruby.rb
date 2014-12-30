@@ -57,8 +57,6 @@ Puppet::Type.type(:gitlab_user_key).provide(
       :private_token => self.private_token
     }
 
-    puts "FETCHING USERS"
-
     uri = '/users'
     response = RestClient.get(self.api_url + uri, params)
 
@@ -90,12 +88,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
           :private_token => self.private_token
         }
 
-        puts "FETCHING KEYS"
-
         uri = "/users/%s/keys" % founduser['id']
-        puts "URL " << self.api_url
-        puts "URI " << uri
-        pp params
         response = RestClient.get(self.api_url + uri, params)
 
         if response.code == 200
@@ -112,7 +105,6 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
         if foundkey
 
-          puts "FOUND KEY"
           # If we have found the user and have a key to add, set the properties
           # and mark :ensure as :present.
 
@@ -129,7 +121,6 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
         else
   
-          puts "NOT FOUND KEY"
           # If no key has been found, mark :ensure as :absent.
 
           resource.provider = new(:ensure => :absent)
@@ -141,7 +132,6 @@ Puppet::Type.type(:gitlab_user_key).provide(
       end
 
     end
-    puts "FINISHED PREFETCH"
 
   end
 
@@ -149,17 +139,20 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
   def flush
 
-    puts "STARTING FLUSH"
     # Work out whether the gitlab_user_key resource should be created,
     # destroyed or updated by comparing the @property_hash as it is now with
     # the @old_properties hash that was duped when the provider was created.
 
+    if @property_hash[:ensure]
+      puts "ENSURE IS " << @property_hash[:ensure]
+    end
     case @property_hash[:ensure]
 
     when :absent
 
       if @old_properties[:ensure] == :present
 
+        puts "DELETING"
         # If the gitlab_user_key resource is now marked as absent but was
         # previously marked as present then delete it from Gitlab.
 
@@ -176,6 +169,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
       if @old_properties[:ensure] == :absent
 
+        puts "CREATING"
         # If the gitlab_user_key resource is now marked as present but was
         # previously marked as absent then create it in Gitlab.
  
@@ -195,7 +189,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
         # properties have changed. This is done by deleting the existing key
         # entry and creating a new one.
 
-        puts "PRESENT"
+        puts "MODIFYING"
 
         if changed? && user_id && key_id
 
