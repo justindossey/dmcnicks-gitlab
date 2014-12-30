@@ -77,5 +77,11 @@ class gitlab::config (
   gitlab_group { 'My Group':
     ensure => 'present',
     session => 'config'
+  } ->
+
+  gitlab_project { 'My New Project':
+    ensure => 'present',
+    session => 'config',
+    namespace => 'My Group'
   }
 }
