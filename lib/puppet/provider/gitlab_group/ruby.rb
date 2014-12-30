@@ -152,14 +152,14 @@ Puppet::Type.type(:gitlab_group).provide(
 
       end
 
-      # Returns a path slug created from the given name.
-
-      def get_path_for(name)
-        name.downcase.gsub(/[^a-z0-9]+/, '-').sub(/^-/, '').sub(/-$/, '')
-      end
-
     end
 
+  end
+
+  # Returns a path slug created from the given name.
+
+  def get_path_for(name)
+    name.downcase.gsub(/[^a-z0-9]+/, '-').sub(/^-/, '').sub(/-$/, '')
   end
 
 end
