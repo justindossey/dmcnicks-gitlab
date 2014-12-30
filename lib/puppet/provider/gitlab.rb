@@ -1,5 +1,8 @@
 class Puppet::Provider::Gitlab < Puppet::Provider
 
+  class_variable_set(:@@token, nil)
+  class_variable_set(:@@api_url, nil)
+
   protected
   
     def token
