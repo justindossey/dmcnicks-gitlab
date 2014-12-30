@@ -94,9 +94,10 @@ Puppet::Type.type(:gitlab_user_key).provide(
         if response.code == 200
 
           keys = JSON.parse(response)
+          pp keys
 
           keys.each do |key|
-            if key['title'] == name
+            if key['title'] == resource[:title]
               foundkey = key.dup
             end
           end
