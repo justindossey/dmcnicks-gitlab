@@ -31,6 +31,8 @@ Puppet::Type.type(:gitlab_user).provide(
     # user before manifests make changes. This will be used in the flush
     # method to work out what has changed.
     
+    puts "PROVIDER INITIALIZED, ENSURE: " << @property_hash[:ensure]
+
     @old_properties = @property_hash.dup
 
   end
@@ -63,39 +65,35 @@ Puppet::Type.type(:gitlab_user).provide(
  
     resources.each do |name, resource|
  
-      # Find the user record.
+      puts "USERNAME: " << name
+
+      # Find the user record. Start with a properties has that has :ensure set
+      # to :absent. If the user record is found, replace it with a hash
+      # containing the user properties and setting :ensure to :present.
       
-      user = {}
+      properties = {
+        :ensure => :absent
+      }
 
       users.each do |u|
         if u['username'] == resource[:username]
-          user = u
+
+          puts "FOUND USER"
+
+          properties = {
+            :ensure   => :present,
+            :id       => u['id'],
+            :username => u['username'],
+            :email    => u['email'],
+            :fullname => u['name']
+          }
+
         end
       end
 
-      # Collect the properties for the user.
-      #
-      # Note that the fullname property maps onto the name property from the
-      # API. This is done because if we defined a type property called :name
-      # it would automatically become a namevar, when we want the namevar for
-      # the gitlab_user type to be :username.
-      #
-      # Note also that we are not collecting the password from the Gitlab API.
-      # That is because the API does not expose the password. The password can
-      # still be set by the provider if one is specified in the manifest.
-      #
-      # Finally, note that we are storing the :id as a property even though
-      # it is not accessible by the type. It is needed to make API calls later
-      # in the flush method.
+      # Create a new provider.
 
-      properties = {
-        :id       => user['id'],
-        :username => user['username'],
-        :email    => user['email'],
-        :fullname => user['name']
-      }
-
-      # Create a new provider with the found properties.
+      puts "CREATING PROVIDER, ENSURE: " << properties[:ensure]
  
       resource.provider = new(properties)
 
