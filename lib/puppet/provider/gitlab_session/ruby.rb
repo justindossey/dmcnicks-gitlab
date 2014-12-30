@@ -21,11 +21,11 @@ Puppet::Type.type(:gitlab_session).provide(
     end
   end  
 
-  def create
-    Puppet::Provider::Gitlab.api_url = resource[:api_url]
+  def prefetch(newresources)
+    Puppet::Provider::Gitlab.api_url = newresources[:api_url]
     params = {
-      :login    => resource[:api_login],
-      :password => resource[:api_password]
+      :login    => newresources[:api_login],
+      :password => newresourcase[:api_password]
     }
     uri = '/session'
     response = RestClient.post(Puppet::Provider::Gitlab.api_url + uri, params)
@@ -33,13 +33,5 @@ Puppet::Type.type(:gitlab_session).provide(
       session = JSON.parse(response)
       Puppet::Provider::Gitlab.token = session['private_token']
     end
-  end
-
-  def destroy
-    Puppet::Provider::Gitlab.token = nil
-  end
-
-  def exists?
-    Puppet::Provider::Gitlab.token != nil
   end
 end
