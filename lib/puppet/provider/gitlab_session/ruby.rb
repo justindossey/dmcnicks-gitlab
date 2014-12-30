@@ -1,10 +1,7 @@
 require 'puppet/provider/gitlab'
 require 'json'
 
-Puppet::Type.type(:gitlab_session).provide(
-  :rubyone,
-  :parent => Puppet::Provider::Gitlab
-) do
+Puppet::Type.type(:gitlab_session).provide(:rubythree) do
 
   desc 'Default provider for gitlab_session type'
 
@@ -27,6 +24,8 @@ Puppet::Type.type(:gitlab_session).provide(
   
     self.class.private_token = token
     self.class.api_url = url
+
+    # Pass the rest of the arguments to the parent.
 
     super(*args)
 
@@ -53,13 +52,14 @@ Puppet::Type.type(:gitlab_session).provide(
       }
 
       result = {}
+
       uri = '/session'
       response = RestClient.post(url + uri, params)
 
       if response.code == 201
 
         # If logged in, create a new provider containing the private token,
-        # API url and mark it as present.
+        # API URL and mark it as present.
 
         session = JSON.parse(response)
         token = session['private_token']
