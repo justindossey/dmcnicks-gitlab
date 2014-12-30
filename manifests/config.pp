@@ -62,17 +62,15 @@ class gitlab::config (
   gitlab_user { 'root':
     ensure       => 'present',
     session      => 'config',
-    fullname     => 'Joe Bloggs',
-    require      => Gitlab_session['config']
+    fullname     => 'Joe Bloggs'
   }
 
   # Associate the root user public key with the Gitlab root user.
 
-  gitlab_user_key { 'thirdkey':
+  gitlab_user_key { 'root public key':
     ensure       => 'present',
     session      => 'config',
     username     => 'root',
-    key          => 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC1nj25yO+Jgm6/YQTHgEwkjJMgn5q+5vX22CQHdiO1/Dba5TKjr9w0T/SG94yi+l8qJQh/yhrwcvdiQc16V6ltfST1J3yZ0Rad+RUTD1pbWax376HzmtK7a6qZnSkAKTQ+WrQDOqtsPasOT4rLrW8DXUHbXLBTO5X6BydVcmG21sxHU4ikWL3dDI6qkzUd3b3u8EWBSMsirVEiG5hOScSZVy5mzfCGFz0hlx/9gjjbS/mjUAmIh29M6v+DnTkhzNsVeNO+DCWjgVh1nbW8GYDUD4C67seVCzVYNR/4IhLIuj208mJ/ZWZRxOUwj5fC+ApmWyMjN6v2iVxUs/HotxeZ root@agentdebian.local',
-    require      => Gitlab_session['config']
+    key          => 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC1nj25yO+Jgm6/YQTHgEwkjJMgn5q+5vX22CQHdiO1/Dba5TKjr9w0T/SG94yi+l8qJQh/xhrwcvdiQc16V6ltfST1J3yZ0Rad+RUTD1pbWax376HzmtK7a6qZnSkAKTQ+WrQDOqtsPasOT4rLrW8DXUHbXLBTO5X6BydVcmG21sxHU4ikWL3dDI6qkzUd3b3u8EWBSMsirVEiG5hOScSZVy5mzfCGFz0hlx/9gjjbS/mjUAmIh29M6v+DnTkhzNsVeNO+DCWjgVh1nbW8GYDUD4C67seVCzVYNR/4IhLIuj208mJ/ZWZRxOUwj5fC+ApmWyMjN6v2iVxUs/HotxeZ root@agentdebian.local'
   }
 }
