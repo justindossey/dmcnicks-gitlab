@@ -7,7 +7,7 @@ Puppet::Type.newtype(:gitlab_group) do
   newparam(:name) do
     desc 'The name of the group'
     validate do |value|
-      unless value =~ /^[a-z0-9]+$/
+      unless value =~ /^[\w\-_ ]+$/
         raise ArgumentError , "%s is not a valid group name" % value
       end
     end
