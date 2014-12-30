@@ -8,10 +8,8 @@ Puppet::Type.type(:gitlab_session).provide(
 
   desc 'Default provider for gitlab_session type'
 
-  # Confine the provider to only run once the rest-client package is
-  # available. Puppet will install the rest-client package during the
-  # first run. This confine will return true in subsequent runs.
-  
+  # Make sure that the rest-client package is available.
+
   confine :true => begin
     begin
       require 'rest_client'
@@ -21,19 +19,56 @@ Puppet::Type.type(:gitlab_session).provide(
     end
   end  
 
-  def prefetch(newresources)
-    puts "In gitlab_session prefetch"
-    api_url = newresources[:api_url]
-    params = {
-      :login    => newresources[:api_login],
-      :password => newresourcase[:api_password]
-    }
-    uri = '/session'
-    response = RestClient.post(api_url + uri, params)
-    if response.code == 201
-      session = JSON.parse(response)
-      token = session['private_token']
-      puts "LOL " << token
-    end
+  # Create a new gitlab_session provider.
+  
+  def initialize(token, url)
+
+    # Set the private_token and api_url class variables.
+  
+    self.private_token = token
+    self.api_url = url
+
+    super
+
   end
+
+  # Prefetch resource data for all declared gitlab_session resources.
+ 
+  def self.prefetch(resources)
+
+    # There should only ever be one gitlab_session resource declared for
+    # any node but we will cycle through the declared session resources for
+    # completeness.
+
+    resources.each do |name, resource|
+  
+      # Perform a login to the API and fetch the returned private token.
+      
+      token = nil
+      url = resource[:api_url]
+
+      params = {
+        :login    => resource[:api_login],
+        :password => resource[:api_password]
+      }
+
+      uri = '/session'
+      response = RestClient.post(url + uri, params)
+
+      if response.code == 201
+        session = JSON.parse(response)
+        token = session['private_token']
+      end
+
+      # Initialise the provider for this resource.
+      
+      resource.provider = new(token, url)
+
+    end
+
+  end
+
+  # This provider has no flush method because it has no properties to
+  # flush.
+
 end
