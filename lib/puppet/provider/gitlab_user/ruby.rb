@@ -46,7 +46,7 @@ Puppet::Type.type(:gitlab_user).provide(
     # Before we cycle through the resources we can prefetch all of the
     # defined user records from the API.
     
-    users = nil
+    users = []
 
     params = {
       :private_token => self.private_token
