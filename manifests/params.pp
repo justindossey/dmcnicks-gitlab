@@ -15,10 +15,7 @@ class gitlab::params () {
 
   $ssl = false
 
-  $worker_processes = 2
-
-  $api_login = 'root'
-  $default_password = '5iveL!fe'
+  $worker_processes = 1
 
   $installer_dir = '/srv'
 
