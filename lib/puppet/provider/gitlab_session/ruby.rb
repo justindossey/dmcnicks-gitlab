@@ -31,7 +31,7 @@ Puppet::Type.type(:gitlab_session).provide(
  
       # Set the API URL.
 
-      self.api_url = resource[:url]
+      self.site_url = resource[:url]
 
       # Attempt to login.
 

@@ -18,10 +18,10 @@ Puppet::Type.newtype(:gitlab_session) do
   end
 
   newparam(:url) do
-    desc 'The URL of the Gitlab API'
+    desc 'The URL of the Gitlab site'
     validate do |value|
-      unless value =~ /^http(s)?:\/\/(\w+)(\.\w+)+(\/)?/
-        raise ArgumentError , "%s is not a valid API URL" % value
+      unless value =~ /^http(s)?:\/\/(\w+)(\.\w+)+(\/)?$/
+        raise ArgumentError , "%s is not a valid site URL" % value
       end
     end
   end

@@ -2,10 +2,14 @@ require 'json'
 
 class Puppet::Provider::Gitlab < Puppet::Provider
 
+  # The URI of the current API.
+
+  self.const_set(:API_URI, '/api/v3')
+
   # Initialise the class variables.
 
   self.class_variable_set(:@@private_token, nil)
-  self.class_variable_set(:@@api_url, nil)
+  self.class_variable_set(:@@site_url, nil)
 
   # These create, destroy and exists? methods provide the basic ensurable
   # functionality for all of the Gitlab providers. Since we are using prefetch
@@ -30,24 +34,16 @@ class Puppet::Provider::Gitlab < Puppet::Provider
   end
 
   #
-  # Class methods that give provider subclasses access to the shared
-  # private_token and api_url class variables.
+  # Class setter methods that allow the gitlab_session provider to set the
+  # private_token and site_url class variables.
   #
-
-  def self.private_token
-    @@private_token
-  end
 
   def self.private_token=(value)
     @@private_token = value
   end
 
-  def self.api_url
-    @@api_url
-  end
-
-  def self.api_url=(value)
-    @@api_url = value
+  def self.site_url=(value)
+    @@site_url = value
   end
 
   #
@@ -56,9 +52,11 @@ class Puppet::Provider::Gitlab < Puppet::Provider
 
   def self.api_get(uri, params = {})
     
-    params[:private_token] = self.private_token
+    api_url = @@site_url + API_URI
+
+    params[:private_token] = @@private_token
     
-    r = RestClient::Resource.new(self.api_url + uri,
+    r = RestClient::Resource.new(api_url + uri,
                                  :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
     
     begin
@@ -71,9 +69,11 @@ class Puppet::Provider::Gitlab < Puppet::Provider
 
   def self.api_post(uri, params = {})
     
-    params[:private_token] = self.private_token
+    api_url = @@site_url + API_URI
+
+    params[:private_token] = @@private_token
     
-    r = RestClient::Resource.new(self.api_url + uri,
+    r = RestClient::Resource.new(api_url + uri,
                                  :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
     
     begin
@@ -86,9 +86,11 @@ class Puppet::Provider::Gitlab < Puppet::Provider
 
   def self.api_put(uri, params = {})
 
-    params[:private_token] = self.private_token
+    api_url = @@site_url + API_URI
 
-    r = RestClient::Resource.new(self.api_url + uri,
+    params[:private_token] = @@private_token
+
+    r = RestClient::Resource.new(api_url + uri,
                                  :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
 
     begin
@@ -101,9 +103,11 @@ class Puppet::Provider::Gitlab < Puppet::Provider
 
   def self.api_delete(uri, params = {})
 
-    params[:private_token] = self.private_token
+    api_url = @@site_url + API_URI
 
-    r = RestClient::Resource.new(self.api_url + uri,
+    params[:private_token] = @@private_token
+
+    r = RestClient::Resource.new(api_url + uri,
                                  :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
 
     begin
@@ -116,12 +120,14 @@ class Puppet::Provider::Gitlab < Puppet::Provider
 
   def self.api_login(login, password)
 
+    api_url = @@site_url + API_URI
+
     params = {
       :login    => login,
       :password => password
     }
 
-    r = RestClient::Resource.new(self.api_url + '/session',
+    r = RestClient::Resource.new(api_url + '/session',
                                  :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
 
     begin
