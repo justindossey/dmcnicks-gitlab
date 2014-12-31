@@ -1,5 +1,6 @@
 require 'puppet/provider/gitlab'
 require 'json'
+require 'pp'
 
 Puppet::Type.type(:gitlab_user).provide(
   :ruby,
@@ -73,20 +74,25 @@ Puppet::Type.type(:gitlab_user).provide(
         end
       end
 
-      if founduser
+      # If a user has been found, create a provider with :ensure set to
+      # :present and the user details. 
 
-        # If a user has been found, create a provider with :ensure set to
-        # :present and the user details. 
+      if founduser
 
         # If a password has been specified, check whether it is currently
         # valid. If it is then we will set the prefetched resource to the
         # same password to avoid extraneous "defined 'password' as 'nnnn'"
         # messages on the puppet agent.
  
+        password = nil
+
         if (resource['password'] &&
             login?(founduser['username'], resource['password']))
 
+          puts "LOGGEDIN"
           password = resource['password']
+        else
+          puts "NOTLOGGEDIN"
         end
 
         properties = {
@@ -198,7 +204,9 @@ Puppet::Type.type(:gitlab_user).provide(
     }
 
     begin
+      pp params
       response = RestClient.post(resource[:url] + '/session', params)
+      pp response
       return response.code == 201
     rescue
       return false
