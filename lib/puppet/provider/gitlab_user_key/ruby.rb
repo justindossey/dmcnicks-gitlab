@@ -19,7 +19,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
     end
   end  
 
-  # Store the user ID and key ID parameters as instance variables.
+  # Store the user ID, key ID and key title parameters as instance variables.
 
   attr_accessor :user_id, :key_id, :key_title
 
