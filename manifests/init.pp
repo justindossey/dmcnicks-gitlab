@@ -42,7 +42,7 @@
 #
 
 class gitlab (
-  $download_url,
+  $download_url = $gitlab::params::download_url,
   $installer_dir = $gitlab::params::installer_dir,
   $installer_file = $gitlab::params::installer_file,
   $installer_cmd = $gitlab::params::installer_cmd,
