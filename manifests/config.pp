@@ -7,14 +7,14 @@
 # [*gitlab_url*]
 #   The URL of Gitlab.
 #
-# [*default_password*]
-#   The default password for the admin user set by the installer.
-#
 # [*api_login*]
 #   The admin user used to access the Gitlab API.
 #
 # [*api_password*]
 #   The password for the admin user.
+#
+# [*new_password*]
+#   The new password for the admin user, which will be set if specified.
 #
 # === Authors
 #
@@ -27,14 +27,10 @@
 
 class gitlab::config (
   $gitlab_url,
-  $default_password,
   $api_login,
-  $api_password
+  $api_password,
+  $new_password
 ) {
-
-  # Work out the Gitlab API URL.
-
-  $api_url = "${gitlab_url}/api/v3"
 
   # The Gitlab configuration providers require the Ruby rest-client gem. Note
   # that this package will be installed on the first puppet run. The providers
@@ -49,26 +45,14 @@ class gitlab::config (
     provider => 'gem'
   }
 
-  # Login to the Gitlab API.
+  # Login to the Gitlab API and change the password if it has been specified.
 
-  gitlab_session { 'config':
+  $api_url = "${gitlab_url}/api/v3"
+
+  gitlab_session { 'initial-gitlab-config':
     url               => $api_url,
     login             => $api_login,
-    password          => 'foobar44',
-    previous_password => 'foobar33'
-  }
-
-  # Change the default Gitlab password.
-
-  gitlab_user { 'root':
-    ensure       => 'present',
-    session      => 'config',
-    fullname     => 'George Foo',
-    password     => 'foobar44'
-  }
-
-  gitlab_project { 'My Other Project':
-    ensure => 'present',
-    session => 'config'
+    password          => $api_password,
+    new_password      => $new_password
   }
 }
