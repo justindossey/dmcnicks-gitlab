@@ -52,12 +52,7 @@ Puppet::Type.type(:gitlab_user).provide(
     
     users = []
 
-    params = {
-      :private_token => self.private_token
-    }
-
-    uri = '/users'
-    response = RestClient.get(self.api_url + uri, params)
+    response = api_get('/users')
 
     if response.code == 200
       users = JSON.parse(response)
@@ -89,7 +84,7 @@ Puppet::Type.type(:gitlab_user).provide(
  
         password = nil
 
-        if login?(founduser['username'], resource['password'])
+        if api_login(founduser['username'], resource['password'])
           password = resource['password']
         end
 
@@ -135,12 +130,9 @@ Puppet::Type.type(:gitlab_user).provide(
         # If the gitlab_user resource is now marked as absent but was
         # previously marked as present then delete it from Gitlab.
 
-        params = {
-          :private_token => self.class.private_token
-        }
-
         uri = '/users/%s' % user_id
-        RestClient.delete(self.class.api_url + uri, params)
+
+        api_delete(uri)
 
       end
 
@@ -159,8 +151,7 @@ Puppet::Type.type(:gitlab_user).provide(
           :name          => @property_hash[:fullname]
         }
 
-        uri = '/users'
-        RestClient.post(self.class.api_url + uri, params)
+        api_post('/users', params)
 
       else
 
@@ -168,48 +159,18 @@ Puppet::Type.type(:gitlab_user).provide(
         # previously marked as present too then update any changed properties
         # in Gitlab.
 
-        params = {
-          :private_token => self.class.private_token,
-        }
+        params = {}
 
-        if @property_hash[:password]
-          params[:password] = @property_hash[:password]
-        end
-
-        if @property_hash[:email]
-          params[:email] = @property_hash[:email]
-        end
-
-        if @property_hash[:fullname]
-          params[:name] = @property_hash[:fullname]
+        self.class.resource_type.validproperties.each do |property|
+          params[property] = @property_hash[property]
         end
 
         uri = '/users/%s' % user_id
-        RestClient.put(self.class.api_url + uri, params)
+
+        api_put(uri, params)
 
       end
 
-    end
-
-  end
-
-  # Returns true if the provided credentials are valid (i.e. that they can
-  # be used to login to the API.
-
-  def self.login?(login, password)
-
-    return false if ! password
-
-    params = {
-      :login    => login,
-      :password => password
-    }
-
-    begin
-      response = RestClient.post(self.api_url + '/session', params)
-      return response.code == 201
-    rescue 
-      return false
     end
 
   end
