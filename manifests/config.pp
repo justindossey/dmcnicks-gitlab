@@ -50,9 +50,9 @@ class gitlab::config (
   $api_url = "${gitlab_url}/api/v3"
 
   gitlab_session { 'initial-gitlab-config':
-    url               => $api_url,
-    login             => $api_login,
-    password          => $api_password,
-    new_password      => $new_password
+    url          => $api_url,
+    login        => $api_login,
+    password     => $api_password,
+    new_password => $new_password
   }
 }
