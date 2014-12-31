@@ -52,12 +52,7 @@ Puppet::Type.type(:gitlab_project).provide(
     
     projects = []
 
-    params = {
-      :private_token => self.private_token
-    }
-
-    uri = '/projects/all'
-    response = RestClient.get(self.api_url + uri, params)
+    response = api_get('/projects/all')
 
     if response.code == 200
       projects = JSON.parse(response)
@@ -131,12 +126,9 @@ Puppet::Type.type(:gitlab_project).provide(
         # If the gitlab_project resource is now marked as absent but was
         # previously marked as present then delete it from Gitlab.
 
-        params = {
-          :private_token => self.class.private_token
-        }
-
         uri = '/projects/%s' % project_id
-        RestClient.delete(self.class.api_url + uri, params)
+
+        api_delete(uri)
 
       end
 
@@ -170,7 +162,7 @@ Puppet::Type.type(:gitlab_project).provide(
 
         end
 
-        RestClient.post(self.class.api_url + uri, params)
+        api_post(uri, params)
 
         # Projects do not have modifiable properties so there is no third
         # option of modifying an existing resource here. It would be nice if
