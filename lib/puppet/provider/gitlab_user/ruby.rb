@@ -86,13 +86,8 @@ Puppet::Type.type(:gitlab_user).provide(
  
         password = nil
 
-        if (resource['password'] &&
-            login?(founduser['username'], resource['password']))
-
-          puts "LOGGEDIN"
+        if login?(founduser['username'], resource['password'])
           password = resource['password']
-        else
-          puts "NOTLOGGEDIN"
         end
 
         properties = {
@@ -197,6 +192,8 @@ Puppet::Type.type(:gitlab_user).provide(
   # be used to login to the API.
 
   def self.login?(login, password)
+
+    return false if ! password
 
     params = {
       :login    => login,
