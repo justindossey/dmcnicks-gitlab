@@ -49,7 +49,7 @@ class Puppet::Provider::Gitlab < Puppet::Provider
   end
 
   #
-  # Utility class methods for provider subclasses.
+  # Utility methods for provider subclasses.
   #
 
   # Returns a slug created from the given name.
@@ -108,6 +108,50 @@ class Puppet::Provider::Gitlab < Puppet::Provider
 
     return nil
 
+  end
+
+  # Returns the project ID of the given project.
+
+  def self.project_id_for(name)
+
+    params = {
+      :private_token => self.private_token
+    }
+
+    # Check if the id matches any projects.
+
+    uri = '/projects/all'
+    response = RestClient.get(self.api_url + uri, params)
+
+    if response.code == 200
+      projects = JSON.parse(response)
+      projects.each do |project|
+        if project['projectname'] == name
+          return project['id']
+        end
+      end
+    end
+
+    return nil
+
+  end
+
+  # Create equivalent instance methods for the above class methods.
+
+  def slug_for(name)
+    return self.class.slug_for(name)
+  end
+
+  def group_id_for(name)
+    return self.class.group_id_for(name)
+  end
+
+  def user_id_for(name)
+    return self.class.user_id_for(name)
+  end
+
+  def project_id_for(name)
+    return self.class.project_id_for(name)
   end
 
 end
