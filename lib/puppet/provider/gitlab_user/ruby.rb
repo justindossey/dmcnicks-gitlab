@@ -205,10 +205,11 @@ Puppet::Type.type(:gitlab_user).provide(
 
     begin
       pp params
-      response = RestClient.post(resource[:url] + '/session', params)
+      response = RestClient.post(self.api_url + '/session', params)
       pp response
       return response.code == 201
-    rescue
+    rescue Exception => e
+      pp e
       return false
     end
 
