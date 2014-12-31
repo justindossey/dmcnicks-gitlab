@@ -28,7 +28,7 @@ The `gitlab` Puppet module installs and configures Omnibus Gitlab and provides c
 
 ### Defined Types
 
-** Cautionary note: any resources created inside Gitlab by these types will be managed solely by Puppet. The created projects, groups, users and so on will not be able to be changed or deleted through the Gitlab user interface. **
+**Cautionary note: any resources created inside Gitlab by these types will be managed solely by Puppet. The created projects, groups, users and so on will not be able to be changed or deleted through the Gitlab user interface.**
 
 All of the defined types use the Gitlab REST API and require the `rest-client` ruby gem installed:
 
