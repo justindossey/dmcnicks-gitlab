@@ -78,13 +78,24 @@ Puppet::Type.type(:gitlab_user).provide(
         # If a user has been found, create a provider with :ensure set to
         # :present and the user details. 
 
+        # If a password has been specified, check whether it is currently
+        # valid. If it is then we will set the prefetched resource to the
+        # same password to avoid extraneous "defined 'password' as 'nnnn'"
+        # messages on the puppet agent.
+ 
+        if (resource['password'] &&
+            login?(founduser['username'], resource['password']))
+
+          password = resource['password']
+        end
+
         properties = {
           :ensure   => :present,
           :id       => founduser['id'],
           :username => founduser['username'],
           :email    => founduser['email'],
           :fullname => founduser['name'],
-          :password => resource['password']
+          :password => password
         }
 
         resource.provider = new(properties)
@@ -172,6 +183,25 @@ Puppet::Type.type(:gitlab_user).provide(
 
       end
 
+    end
+
+  end
+
+  # Returns true if the provided credentials are valid (i.e. that they can
+  # be used to login to the API.
+
+  def self.login?(login, password)
+
+    params = {
+      :login    => login,
+      :password => password
+    }
+
+    begin
+      response = RestClient.post(resource[:url] + '/session', params)
+      return response.code == 201
+    rescue
+      return false
     end
 
   end
