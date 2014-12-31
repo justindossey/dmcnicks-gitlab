@@ -37,6 +37,11 @@ Puppet::Type.newtype(:gitlab_user) do
 
   newproperty(:password) do
     desc 'The password for the user'
+    validate do |value|
+      if value && value.length < 8
+        raise ArgumentError , "password is too short (minimum is 8 characters)" 
+      end
+    end
   end
 
   newproperty(:fullname) do
