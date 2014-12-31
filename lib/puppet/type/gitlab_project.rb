@@ -56,4 +56,8 @@ Puppet::Type.newtype(:gitlab_project) do
     [ self[:session] ]
   end
 
+  autorequire(:gitlab_user) do
+    [ self[:owner] ]
+  end
+
 end
