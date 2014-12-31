@@ -19,9 +19,9 @@ Puppet::Type.type(:gitlab_project).provide(
     end
   end  
 
-  # Store the project ID and name as instance variables.
+  # Store parameters as instance variables.
 
-  attr_accessor :project_id, :project_name
+  attr_accessor :project_id, :project_name, :project_owner, :project_namespace
 
   # Create a new gitlab_project provider.
 
@@ -91,6 +91,8 @@ Puppet::Type.type(:gitlab_project).provide(
 
         resource.provider.project_id = foundproject['id']
         resource.provider.project_name = foundproject['name']
+        resource.provider.project_name = foundproject['owner']['name']
+        resource.provider.project_namespace = foundproject['namespace']['name']
 
       else
 
@@ -99,6 +101,8 @@ Puppet::Type.type(:gitlab_project).provide(
         resource.provider = new(:ensure => :absent)
 
         resource.provider.project_name = name
+        resource.provider.project_owner = resource[:owner]
+        resource.provider.project_namespace = resource[:namespace]
 
       end
 
@@ -143,10 +147,17 @@ Puppet::Type.type(:gitlab_project).provide(
           :private_token => self.class.private_token,
           :name          => project_name,
           :path          => get_path_for(project_name),
-          :namespace_id  => get_namespace_id(@property_hash[:namespace])
+          :namespace_id  => get_namespace_id(project_namespace)
         }
 
         uri = '/projects'
+
+        # If an owner is specified, create the project as that owner.
+
+        if project_owner
+          uri = '/projects/user/%s' % get_user_id(project_owner)
+        end
+
         RestClient.post(self.class.api_url + uri, params)
 
         # Projects do not have modifiable properties so there is no third
@@ -168,9 +179,16 @@ Puppet::Type.type(:gitlab_project).provide(
 
   # Returns the ID of the namespace with the given name. For projects, a
   # namespace can either be a group or an individual user so both have to
-  # be searched for.
+  # be searched.
 
   def get_namespace_id(name)
+    id = get_group_id(name)
+    id ? id : get_user_id(name)
+  end
+
+  # Returns the group ID of the given group.
+
+  def get_group_id(group)
 
     params = {
       :private_token => self.class.private_token
@@ -184,11 +202,23 @@ Puppet::Type.type(:gitlab_project).provide(
     if response.code == 200
       groups = JSON.parse(response)
       groups.each do |group|
-        if group['name'] == name
+        if group['name'] == group
           return group['id']
         end
       end
     end
+
+    return nil
+
+  end
+
+  # Returns the user ID of the given user.
+
+  def get_user_id(username)
+
+    params = {
+      :private_token => self.class.private_token
+    }
 
     # Check if the id matches any users.
 
@@ -198,13 +228,11 @@ Puppet::Type.type(:gitlab_project).provide(
     if response.code == 200
       users = JSON.parse(response)
       users.each do |user|
-        if user['name'] == name
+        if user['name'] == username
           return user['id']
         end
       end
     end
-
-    # If neither, return nil.
 
     return nil
 

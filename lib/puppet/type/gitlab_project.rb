@@ -24,9 +24,16 @@ Puppet::Type.newtype(:gitlab_project) do
     end
   end
 
-  # Properties.
+  newparam(:owner) do
+    desc 'The owner of the project'
+    validate do |value|
+      unless value =~ /^[a-z0-9]+$/
+        raise ArgumentError , "%s is not a valid project owner name" % value
+      end
+    end
+  end
 
-  newproperty(:namespace) do
+  newparam(:namespace) do
     desc 'The namespace that the project sits in'
     validate do |value|
       unless value =~ /^[\w\-_ ]+$/
