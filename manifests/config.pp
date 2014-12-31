@@ -86,7 +86,7 @@ class gitlab::config (
   }
 
   gitlab_deploy_key { 'my deploy key':
-    ensure       => 'present',
+    ensure       => 'absent',
     session      => 'config',
     project      => 'My New Project',
     key          => 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC94v1rpU/pJ1+coP0gThjMpgpvHVCMC/3YX+91SxSv3tpAVnUCi4yUNxLagA/0xQX9+WyWP3hHGo64DnangLZu/1LP8DojqczGVRioYBwpk4KiReCBEJ/m5BdtxPMTHpuh/vK4wTqylwYUgEr0CoZyQxy12wcIDv+CLZj4WiE6yZDodOTPswjidbjkEFZML/n8RFDK8Erq9RZSZZr8EpCSuLOsfMPSTVS5gk1F5X/1ZV1TguE2zVhm9N1MkIZdUn9XxwpabVBEr5B9HLLflch/8A2F+99DHXmpqodlXMaVIkM8T76AoYuZhDRbEoJy/b5nmWRC5irYy8nkgaVzZ83F root@agentdebian'
