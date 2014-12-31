@@ -52,6 +52,10 @@ Puppet::Type.type(:gitlab_session).provide(
         raise Puppet::Error, "Gitlab login for session '%s' failed" % name
       end
 
+      # Set the API token.
+
+      this.private_token = token
+
       # Create the new resource.
 
       resource.provider = new
