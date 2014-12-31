@@ -188,7 +188,7 @@ Puppet::Type.type(:gitlab_project).provide(
 
   # Returns the group ID of the given group.
 
-  def get_group_id(group)
+  def get_group_id(name)
 
     params = {
       :private_token => self.class.private_token
@@ -202,7 +202,7 @@ Puppet::Type.type(:gitlab_project).provide(
     if response.code == 200
       groups = JSON.parse(response)
       groups.each do |group|
-        if group['name'] == group
+        if group['name'] == name
           return group['id']
         end
       end
@@ -214,7 +214,7 @@ Puppet::Type.type(:gitlab_project).provide(
 
   # Returns the user ID of the given user.
 
-  def get_user_id(username)
+  def get_user_id(name)
 
     params = {
       :private_token => self.class.private_token
@@ -228,7 +228,7 @@ Puppet::Type.type(:gitlab_project).provide(
     if response.code == 200
       users = JSON.parse(response)
       users.each do |user|
-        if user['name'] == username
+        if user['username'] == name
           return user['id']
         end
       end
