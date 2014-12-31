@@ -1,5 +1,6 @@
 require 'puppet/provider/gitlab'
 require 'json'
+require 'pp'
 
 Puppet::Type.type(:gitlab_group).provide(
   :ruby,
@@ -52,12 +53,7 @@ Puppet::Type.type(:gitlab_group).provide(
     
     groups = []
 
-    params = {
-      :private_token => self.private_token
-    }
-
-    uri = '/groups'
-    response = RestClient.get(self.api_url + uri, params)
+    response = api_get('/groups')
 
     if response.code == 200
       groups = JSON.parse(response)
@@ -122,12 +118,9 @@ Puppet::Type.type(:gitlab_group).provide(
         # If the gitlab_group resource is now marked as absent but was
         # previously marked as present then delete it from Gitlab.
 
-        params = {
-          :private_token => self.class.private_token
-        }
+        uri = '/groups/%s' % group_id
 
-        uri = '/groups/%s' % @old_properties[:id]
-        RestClient.delete(self.class.api_url + uri, params)
+        api_delete(uri)
 
       end
 
@@ -139,13 +132,13 @@ Puppet::Type.type(:gitlab_group).provide(
         # previously marked as absent then create it in Gitlab.
  
         params = {
-          :private_token => self.class.private_token,
-          :name          => group_name,
-          :path          => get_path_for(group_name)
+          :name => group_name,
+          :path => slug_for(group_name)
         }
 
         uri = '/groups'
-        RestClient.post(self.class.api_url + uri, params)
+
+        api_post(uri, params)
 
         # Groups do not have any modifiable properties so there is no third
         # option of modifying an existing resource here.
@@ -154,12 +147,6 @@ Puppet::Type.type(:gitlab_group).provide(
 
     end
 
-  end
-
-  # Returns a path slug created from the given name.
-
-  def get_path_for(name)
-    name.downcase.gsub(/[^a-z0-9]+/, '-').sub(/^-/, '').sub(/-$/, '')
   end
 
 end

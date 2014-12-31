@@ -19,7 +19,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
     end
   end  
 
-  # Store the user ID and key ID parameters as instance variables.
+  # Store the user ID, key ID and key title parameters as instance variables.
 
   attr_accessor :user_id, :key_id, :key_title
 
@@ -52,12 +52,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
     
     users = []
 
-    params = {
-      :private_token => self.private_token
-    }
-
-    uri = '/users'
-    response = RestClient.get(self.api_url + uri, params)
+    response = api_get('/users')
 
     if response.code == 200
       users = JSON.parse(response)
@@ -83,12 +78,9 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
         foundkey = nil
 
-        params = {
-          :private_token => self.private_token
-        }
-
         uri = "/users/%s/keys" % founduser['id']
-        response = RestClient.get(self.api_url + uri, params)
+
+        response = api_get(uri)
 
         if response.code == 200
 
@@ -129,6 +121,12 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
         end
 
+      else
+
+        # Raise an error if the user is not found.
+
+        raise "user %s not found for key %s" % [ resource[:username], name ]
+
       end
 
     end
@@ -152,12 +150,9 @@ Puppet::Type.type(:gitlab_user_key).provide(
         # If the gitlab_user_key resource is now marked as absent but was
         # previously marked as present then delete it from Gitlab.
 
-        params = {
-          :private_token => self.class.private_token
-        }
-
         uri = '/users/%s/keys/%s' % [ user_id, key_id ]
-        RestClient.delete(self.class.api_url + uri, params)
+
+        api_delete(uri)
 
       end
 
@@ -169,13 +164,13 @@ Puppet::Type.type(:gitlab_user_key).provide(
         # previously marked as absent then create it in Gitlab.
  
         params = {
-          :private_token => self.class.private_token,
-          :key           => @property_hash[:key],
-          :title         => key_title
+          :key   => @property_hash[:key],
+          :title => key_title
         }
 
         uri = "/users/%s/keys" % user_id
-        RestClient.post(self.class.api_url + uri, params)
+
+        api_post(uri, params)
 
       else
 
@@ -188,23 +183,20 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
           # First delete the key.
 
-          params = {
-            :private_token => self.class.private_token
-          }
-
           uri = '/users/%s/keys/%s' % [ user_id, key_id ]
-          RestClient.delete(self.class.api_url + uri, params)
+
+          api_delete(uri)
 
           # Then create a new key.
 
           params = {
-            :private_token => self.class.private_token,
-            :key           => @property_hash[:key],
-            :title         => key_title
+            :key   => @property_hash[:key],
+            :title => key_title
           }
 
           uri = "/users/%s/keys" % user_id
-          RestClient.post(self.class.api_url + uri, params)
+
+          api_post(uri, params)
 
         end
 

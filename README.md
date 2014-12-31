@@ -12,15 +12,16 @@
 
 ## Overview
 
-The `gitlab` module is a 
+The `gitlab` Puppet module installs and configures Omnibus Gitlab and provides custom types for creating projects and users.
 
 ## Description
 
 
 
+
 ## Effects
 
-* 
+* Installs the Omnibus version of Gitlab.
 
 ## Usage
 

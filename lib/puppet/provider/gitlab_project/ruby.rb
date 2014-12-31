@@ -19,9 +19,9 @@ Puppet::Type.type(:gitlab_project).provide(
     end
   end  
 
-  # Store the project ID and name as instance variables.
+  # Store parameters as instance variables.
 
-  attr_accessor :project_id, :project_name
+  attr_accessor :project_id, :project_name, :project_owner
 
   # Create a new gitlab_project provider.
 
@@ -52,12 +52,7 @@ Puppet::Type.type(:gitlab_project).provide(
     
     projects = []
 
-    params = {
-      :private_token => self.private_token
-    }
-
-    uri = '/projects/all'
-    response = RestClient.get(self.api_url + uri, params)
+    response = api_get('/projects/all')
 
     if response.code == 200
       projects = JSON.parse(response)
@@ -83,14 +78,21 @@ Puppet::Type.type(:gitlab_project).provide(
         # :present.
 
         properties = {
-          :ensure       => :present,
-          :namespace    => foundproject['namespace']['name']
+          :ensure    => :present
         }
 
         resource.provider = new(properties)
 
         resource.provider.project_id = foundproject['id']
         resource.provider.project_name = foundproject['name']
+
+        if owner = foundproject['owner']['name']
+          resource.provider.owner = owner
+        end
+
+        if namespace = foundproject['namespace']['name']
+          resource.provider.owner = namespace
+        end
 
       else
 
@@ -99,6 +101,7 @@ Puppet::Type.type(:gitlab_project).provide(
         resource.provider = new(:ensure => :absent)
 
         resource.provider.project_name = name
+        resource.provider.project_owner = resource[:owner]
 
       end
 
@@ -123,12 +126,9 @@ Puppet::Type.type(:gitlab_project).provide(
         # If the gitlab_project resource is now marked as absent but was
         # previously marked as present then delete it from Gitlab.
 
-        params = {
-          :private_token => self.class.private_token
-        }
-
         uri = '/projects/%s' % project_id
-        RestClient.delete(self.class.api_url + uri, params)
+
+        api_delete(uri)
 
       end
 
@@ -140,14 +140,28 @@ Puppet::Type.type(:gitlab_project).provide(
         # previously marked as absent then create it in Gitlab.
  
         params = {
-          :private_token => self.class.private_token,
-          :name          => project_name,
-          :path          => get_path_for(project_name),
-          :namespace_id  => get_namespace_id(@property_hash[:namespace])
+          :name => project_name,
+          :path => slug_for(project_name)
         }
 
         uri = '/projects'
-        RestClient.post(self.class.api_url + uri, params)
+
+        # If an owner is specified, work out whether the owner is a user or
+        # a group, then modify the API call accordingly.
+
+        if project_owner
+
+          if id = user_id_for(project_owner)
+            uri = '/projects/user/%s' % id
+          end
+
+          if id = group_id_for(project_owner)
+            params[:namespace_id] = id
+          end
+
+        end
+
+        api_post(uri, params)
 
         # Projects do not have modifiable properties so there is no third
         # option of modifying an existing resource here. It would be nice if
@@ -157,56 +171,6 @@ Puppet::Type.type(:gitlab_project).provide(
       end
 
     end
-
-  end
-
-  # Returns a path slug created from the given name.
-
-  def get_path_for(name)
-    name.downcase.gsub(/[^a-z0-9]+/, '-').sub(/^-/, '').sub(/-$/, '')
-  end
-
-  # Returns the ID of the namespace with the given name. For projects, a
-  # namespace can either be a group or an individual user so both have to
-  # be searched for.
-
-  def get_namespace_id(name)
-
-    params = {
-      :private_token => self.class.private_token
-    }
-
-    # Check if the id matches any groups.
-
-    uri = '/groups'
-    response = RestClient.get(self.class.api_url + uri, params)
-
-    if response.code == 200
-      groups = JSON.parse(response)
-      groups.each do |group|
-        if group['name'] == name
-          return group['id']
-        end
-      end
-    end
-
-    # Check if the id matches any users.
-
-    uri = '/users'
-    response = RestClient.get(self.class.api_url + uri, params)
-
-    if response.code == 200
-      users = JSON.parse(response)
-      users.each do |user|
-        if user['name'] == name
-          return user['id']
-        end
-      end
-    end
-
-    # If neither, return nil.
-
-    return nil
 
   end
 

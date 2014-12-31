@@ -52,12 +52,7 @@ Puppet::Type.type(:gitlab_deploy_key).provide(
     
     projects = []
 
-    params = {
-      :private_token => self.private_token
-    }
-
-    uri = '/projects/all'
-    response = RestClient.get(self.api_url + uri, params)
+    response = api_get('/projects/all')
 
     if response.code == 200
       projects = JSON.parse(response)
@@ -83,12 +78,9 @@ Puppet::Type.type(:gitlab_deploy_key).provide(
 
         foundkey = nil
 
-        params = {
-          :private_token => self.private_token
-        }
-
         uri = "/projects/%s/keys" % foundproject['id']
-        response = RestClient.get(self.api_url + uri, params)
+
+        response = api_get(uri)
 
         if response.code == 200
 
@@ -152,12 +144,9 @@ Puppet::Type.type(:gitlab_deploy_key).provide(
         # If the gitlab_deploy_key resource is now marked as absent but was
         # previously marked as present then delete it from Gitlab.
 
-        params = {
-          :private_token => self.class.private_token
-        }
-
         uri = '/projects/%s/keys/%s' % [ project_id, key_id ]
-        RestClient.delete(self.class.api_url + uri, params)
+
+        api_delete(uri)
 
       end
 
@@ -169,13 +158,13 @@ Puppet::Type.type(:gitlab_deploy_key).provide(
         # previously marked as absent then create it in Gitlab.
  
         params = {
-          :private_token => self.class.private_token,
-          :key           => @property_hash[:key],
-          :title         => key_title
+          :key   => @property_hash[:key],
+          :title => key_title
         }
 
         uri = "/projects/%s/keys" % project_id
-        RestClient.post(self.class.api_url + uri, params)
+
+        api_post(uri, params)
 
       else
 
@@ -188,23 +177,20 @@ Puppet::Type.type(:gitlab_deploy_key).provide(
 
           # First delete the key.
 
-          params = {
-            :private_token => self.class.private_token
-          }
-
           uri = '/projects/%s/keys/%s' % [ project_id, key_id ]
-          RestClient.delete(self.class.api_url + uri, params)
+
+          api_delete(uri)
 
           # Then create a new key.
 
           params = {
-            :private_token => self.class.private_token,
-            :key           => @property_hash[:key],
-            :title         => key_title
+            :key   => @property_hash[:key],
+            :title => key_title
           }
 
           uri = "/projects/%s/keys" % project_id
-          RestClient.post(self.class.api_url + uri, params)
+
+          api_post(uri, params)
 
         end
 

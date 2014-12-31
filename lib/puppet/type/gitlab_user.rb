@@ -4,7 +4,9 @@ Puppet::Type.newtype(:gitlab_user) do
 
   ensurable
 
-  newparam(:username, :namevar => true) do
+  # Parameters.
+  
+  newparam(:name) do
     desc 'The name of the user'
     validate do |value|
       unless value =~ /^[a-z0-9]+$/
@@ -22,6 +24,8 @@ Puppet::Type.newtype(:gitlab_user) do
     end
   end
 
+  # Properties.
+
   newproperty(:email) do
     desc 'The email address of the user'
     validate do |value|
@@ -33,6 +37,11 @@ Puppet::Type.newtype(:gitlab_user) do
 
   newproperty(:password) do
     desc 'The password for the user'
+    validate do |value|
+      if value && value.length < 8
+        raise ArgumentError , "password is too short (minimum is 8 characters)" 
+      end
+    end
   end
 
   newproperty(:fullname) do
@@ -44,13 +53,18 @@ Puppet::Type.newtype(:gitlab_user) do
     end
   end
 
-  autorequire(:gitlab_session) do
-    [ self[:session] ]
-  end
-
+  # Validation.
+  
   validate do
     unless self[:session]
       raise Puppet::Error, "session is required"
     end
   end
+
+  # Autorequires.
+
+  autorequire(:gitlab_session) do
+    [ self[:session] ]
+  end
+
 end

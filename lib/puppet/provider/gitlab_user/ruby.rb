@@ -1,6 +1,5 @@
 require 'puppet/provider/gitlab'
 require 'json'
-require 'pp'
 
 Puppet::Type.type(:gitlab_user).provide(
   :ruby,
@@ -19,6 +18,10 @@ Puppet::Type.type(:gitlab_user).provide(
       false
     end
   end  
+
+  # Store parameters as instance variables.
+
+  attr_accessor :username, :user_id
 
   # Create a new gitlab_user provider.
 
@@ -49,12 +52,7 @@ Puppet::Type.type(:gitlab_user).provide(
     
     users = []
 
-    params = {
-      :private_token => self.private_token
-    }
-
-    uri = '/users'
-    response = RestClient.get(self.api_url + uri, params)
+    response = api_get('/users')
 
     if response.code == 200
       users = JSON.parse(response)
@@ -86,13 +84,12 @@ Puppet::Type.type(:gitlab_user).provide(
  
         password = nil
 
-        if login?(founduser['username'], resource['password'])
+        if api_login(founduser['username'], resource['password'])
           password = resource['password']
         end
 
         properties = {
           :ensure   => :present,
-          :id       => founduser['id'],
           :username => founduser['username'],
           :email    => founduser['email'],
           :fullname => founduser['name'],
@@ -100,12 +97,15 @@ Puppet::Type.type(:gitlab_user).provide(
         }
 
         resource.provider = new(properties)
+        resource.provider.username = founduser['username']
+        resource.provider.user_id = founduser['id']
 
       else
 
         # If not, create a provider with :ensure set to :absent.
 
         resource.provider = new(:ensure => :absent)
+        resource.provider.username = name
 
       end
 
@@ -130,12 +130,9 @@ Puppet::Type.type(:gitlab_user).provide(
         # If the gitlab_user resource is now marked as absent but was
         # previously marked as present then delete it from Gitlab.
 
-        params = {
-          :private_token => self.class.private_token
-        }
+        uri = '/users/%s' % user_id
 
-        uri = '/users/%s' % @old_properties[:id]
-        RestClient.delete(self.class.api_url + uri, params)
+        api_delete(uri)
 
       end
 
@@ -147,15 +144,13 @@ Puppet::Type.type(:gitlab_user).provide(
         # previously marked as absent then create it in Gitlab.
  
         params = {
-          :private_token => self.class.private_token,
-          :username      => @property_hash[:username],
-          :password      => @property_hash[:password],
-          :email         => @property_hash[:email],
-          :name          => @property_hash[:fullname]
+          :username => username,
+          :password => @property_hash[:password],
+          :email    => @property_hash[:email],
+          :name     => @property_hash[:fullname]
         }
 
-        uri = '/users'
-        RestClient.post(self.class.api_url + uri, params)
+        api_post('/users', params)
 
       else
 
@@ -163,48 +158,18 @@ Puppet::Type.type(:gitlab_user).provide(
         # previously marked as present too then update any changed properties
         # in Gitlab.
 
-        params = {
-          :private_token => self.class.private_token,
-        }
+        params = {}
 
-        if @property_hash[:password]
-          params[:password] = @property_hash[:password]
+        self.class.resource_type.validproperties.each do |property|
+          params[property] = @property_hash[property]
         end
 
-        if @property_hash[:email]
-          params[:email] = @property_hash[:email]
-        end
+        uri = '/users/%s' % user_id
 
-        if @property_hash[:fullname]
-          params[:name] = @property_hash[:fullname]
-        end
-
-        uri = '/users/%s' % @old_properties[:id]
-        RestClient.put(self.class.api_url + uri, params)
+        api_put(uri, params)
 
       end
 
-    end
-
-  end
-
-  # Returns true if the provided credentials are valid (i.e. that they can
-  # be used to login to the API.
-
-  def self.login?(login, password)
-
-    return false if ! password
-
-    params = {
-      :login    => login,
-      :password => password
-    }
-
-    begin
-      response = RestClient.post(self.api_url + '/session', params)
-      return response.code == 201
-    rescue 
-      return false
     end
 
   end
