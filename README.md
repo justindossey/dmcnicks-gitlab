@@ -28,75 +28,95 @@ The `gitlab` Puppet module installs and configures Omnibus Gitlab and provides c
 
 ### Defined Types
 
-All of the defined types use the Gitlab REST API and require the `rest-client`
-ruby gem installed:
+** Cautionary note: any resources created inside Gitlab by these types will be managed solely by Puppet. The created projects, groups, users and so on will not be able to be changed or deleted through the Gitlab user interface. **
+
+All of the defined types use the Gitlab REST API and require the `rest-client` ruby gem installed:
 
     package { 'rest-client':
-      ensure => 'present',
+      ensure   => 'present',
       provider => 'gem'
     }
 
-With that in place, the only caveat for now is that each defined type declaration must include the API URL, admin username and password until I can work out a better way of handling authorisation.
+#### The `gitlab_session` type
 
-You can create a new user in Gitlab with:
+The `gitlab_session` type logs into the Gitlab API and stores a returned token so that other types can connect to the API as needed.
 
-    gitlab_user { 'username':
-      ensure       => 'present',
-      password     => 'initialpassword',
-      email        => 'email@address.com',
-      fullname     => 'Full Name'
-      api_url      => 'https://gitlab.url/api/v3',
-      api_login    => 'root',
-      api_password => 'adminpassword'
+    gitlab_session { 'sessionname':
+      login    => 'root',
+      password => 'rootpassword',
+      url      => 'http://gitlab.site'
     }
 
-You can add a public key to an existing user with:
+The `login` parameter can be any user that has administrative privileges on the Gitlab site. The `url` should be the top-level URL of the site.
 
-    gitlab_user_key { 'username-key':
-      ensure       => 'present',
-      username     => 'existinguser',
-      key          => 'public-key-as-string',
-      api_url      => 'https://gitlab.url/api/v3',
-      api_login    => 'root',
-      api_password => 'adminpassword'
+The name of the session is used to form dependencies between any other of the type declarations and the session declaration. Every other type declaration will include a `session` parameter for this purpose.
+
+#### The `gitlab_user` type
+
+    gitlab_user { 'newusername':
+      ensure   => 'present',
+      session  => 'sessionname',
+      email    => 'valid@email.address',
+      fullname => 'New User',
+      password => 'userpassword'
     }
 
-You can create a group with:
+#### The `gitlab_user_key` type
 
-    gitlab_group { 'Group Name':
-      ensure       => 'present',
-      path         => 'group-name',
-      api_url      => 'https://gitlab.url/api/v3',
-      api_login    => 'root',
-      api_password => 'adminpassword'
+    gitlab_user_key { 'key-for-newuser':
+      ensure   => 'present',
+      session  => 'config',
+      username => 'newusername',
+      key      => 'ssh-rsa NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+    NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+    NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+    NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+    NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+    NNNNNNNNNNNNNNNNNNNNNNNNNNNNNN user@laptop.isp.com'
     }
 
-You can create a new project with:
+The `key` value must be unbroken on a single line. It has been split up in the example above for legibility.
 
-    gitlab_project { 'Project Name':
-      ensure       => 'present',
-      group        => 'group-name',
-      api_url      => 'https://gitlab.url/api/v3',
-      api_login    => 'root',
-      api_password => 'adminpassword'
+#### The `gitlab_group` type
+
+    gitlab_group { 'My Group':
+      ensure  => 'present',
+      session => 'sessionname'
     }
 
-Finally you can add deploy keys to a project with:
+#### The `gitlab_project` type
 
-    gitlab_deploy_key { 'project-key':
-      ensure       => 'present',
-      project      => 'project-name',
-      key          => 'public-key-as-string',
-      api_url      => 'https://gitlab.url/api/v3',
-      api_login    => 'root',
-      api_password => 'adminpassword'
+The `gitlab_project` type creates a project:
+
+    gitlab_project { 'My Big Project':
+      ensure  => 'present',
+      session => 'sessionname',
+      owner   => 'My Group'
     }
+
+The `owner` can be the name of a group or a user. If it is left out the project will be owned by the user that logged into the API.
+
+#### The `gitlab_deploy_key` type
+
+    gitlab_deploy_key { 'key-for-some-app':
+      ensure   => 'present',
+      session  => 'config',
+      project  => 'My Big Project',
+      key      => 'ssh-rsa NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+    NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+    NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+    NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+    NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+    NNNNNNNNNNNNNNNNNNNNNNNNNNNNNN user@laptop.isp.com'
+    }
+
+As with the `gitlab_user_key` type, the `key` value must be unbroken on a single line. 
 
 ## Reference
 
 ### The `gitlab` class
 
-The `gitlab` class does ...
+The `gitlab` class ...
 
 #### Parameters
 
