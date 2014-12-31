@@ -1,6 +1,5 @@
 require 'puppet/provider/gitlab'
 require 'json'
-require 'pp'
 
 Puppet::Type.type(:gitlab_user).provide(
   :ruby,
@@ -19,6 +18,10 @@ Puppet::Type.type(:gitlab_user).provide(
       false
     end
   end  
+
+  # Store the user ID parameter as instance variables.
+
+  attr_accessor :user_id
 
   # Create a new gitlab_user provider.
 
@@ -92,7 +95,6 @@ Puppet::Type.type(:gitlab_user).provide(
 
         properties = {
           :ensure   => :present,
-          :id       => founduser['id'],
           :username => founduser['username'],
           :email    => founduser['email'],
           :fullname => founduser['name'],
@@ -100,6 +102,7 @@ Puppet::Type.type(:gitlab_user).provide(
         }
 
         resource.provider = new(properties)
+        resource.provider.user_id = founduser['id']
 
       else
 
@@ -134,7 +137,7 @@ Puppet::Type.type(:gitlab_user).provide(
           :private_token => self.class.private_token
         }
 
-        uri = '/users/%s' % @old_properties[:id]
+        uri = '/users/%s' % user_id
         RestClient.delete(self.class.api_url + uri, params)
 
       end
@@ -148,7 +151,7 @@ Puppet::Type.type(:gitlab_user).provide(
  
         params = {
           :private_token => self.class.private_token,
-          :username      => @property_hash[:username],
+          :username      => @property_hash[:name],
           :password      => @property_hash[:password],
           :email         => @property_hash[:email],
           :name          => @property_hash[:fullname]
@@ -179,7 +182,7 @@ Puppet::Type.type(:gitlab_user).provide(
           params[:name] = @property_hash[:fullname]
         end
 
-        uri = '/users/%s' % @old_properties[:id]
+        uri = '/users/%s' % user_id
         RestClient.put(self.class.api_url + uri, params)
 
       end

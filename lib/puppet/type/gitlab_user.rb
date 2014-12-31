@@ -6,7 +6,7 @@ Puppet::Type.newtype(:gitlab_user) do
 
   # Parameters.
   
-  newparam(:username, :namevar => true) do
+  newparam(:name) do
     desc 'The name of the user'
     validate do |value|
       unless value =~ /^[a-z0-9]+$/
