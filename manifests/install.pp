@@ -69,7 +69,7 @@ class gitlab::install (
   # 15 minutes.
 
   exec { 'gitlab-download':
-    path    => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
+    path    => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
     command => "wget ${download_url} -O ${installer_path}",
     timeout => '900',
     creates => $installer_path
@@ -78,8 +78,8 @@ class gitlab::install (
   # Run the installer if the contents of the installer file have changed.
 
   exec { 'gitlab-install':
-    path        => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
-    command     => "$installer_cmd $installer_path",
+    path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
+    command     => "${installer_cmd} ${installer_path}",
     refreshonly => true,
     notify      => Exec['gitlab-postinstall']
   }
@@ -96,8 +96,8 @@ class gitlab::install (
   # Run the post-install configuration if the installer has been run.
 
   exec { 'gitlab-postinstall':
-    path        => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
-    command     => "gitlab-ctl reconfigure",
+    path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
+    command     => 'gitlab-ctl reconfigure',
     refreshonly => true
   }
 }
