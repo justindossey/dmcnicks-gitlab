@@ -47,7 +47,7 @@ Puppet::Type.type(:gitlab_session).provide(
         # been set.
  
         if resource[:previous_password]
-          params[:password] => resource[:previous_password]
+          params[:password] = resource[:previous_password]
           response = RestClient.post(resource[:url] + uri, params)
         end
 
