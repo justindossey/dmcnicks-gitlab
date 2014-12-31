@@ -81,7 +81,7 @@ Puppet::Type.type(:gitlab_session).provide(
           :password      => resource[:new_password]
         }
 
-        uri = '/users/%s' % self.user_id_for(resource[:login])
+        uri = '/users/%s' % user_id_for(resource[:login])
 
         RestClient.put(self.api_url + uri, params)
 

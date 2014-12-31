@@ -150,7 +150,7 @@ Puppet::Type.type(:gitlab_project).provide(
         params = {
           :private_token => self.class.private_token,
           :name          => project_name,
-          :path          => get_path_for(project_name)
+          :path          => slug_for(project_name)
         }
 
         uri = '/projects'
@@ -160,11 +160,11 @@ Puppet::Type.type(:gitlab_project).provide(
 
         if project_owner
 
-          if id = get_user_id(project_owner)
+          if id = user_id_for(project_owner)
             uri = '/projects/user/%s' % id
           end
 
-          if id = get_group_id(project_owner)
+          if id = group_id_for(project_owner)
             params[:namespace_id] = id
           end
 
@@ -180,64 +180,6 @@ Puppet::Type.type(:gitlab_project).provide(
       end
 
     end
-
-  end
-
-  # Returns a path slug created from the given name.
-
-  def get_path_for(name)
-    name.downcase.gsub(/[^a-z0-9]+/, '-').sub(/^-/, '').sub(/-$/, '')
-  end
-
-  # Returns the group ID of the given group.
-
-  def get_group_id(name)
-
-    params = {
-      :private_token => self.class.private_token
-    }
-
-    # Check if the id matches any groups.
-
-    uri = '/groups'
-    response = RestClient.get(self.class.api_url + uri, params)
-
-    if response.code == 200
-      groups = JSON.parse(response)
-      groups.each do |group|
-        if group['name'] == name
-          return group['id']
-        end
-      end
-    end
-
-    return nil
-
-  end
-
-  # Returns the user ID of the given user.
-
-  def get_user_id(name)
-
-    params = {
-      :private_token => self.class.private_token
-    }
-
-    # Check if the id matches any users.
-
-    uri = '/users'
-    response = RestClient.get(self.class.api_url + uri, params)
-
-    if response.code == 200
-      users = JSON.parse(response)
-      users.each do |user|
-        if user['username'] == name
-          return user['id']
-        end
-      end
-    end
-
-    return nil
 
   end
 

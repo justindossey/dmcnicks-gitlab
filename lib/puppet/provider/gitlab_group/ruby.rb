@@ -141,7 +141,7 @@ Puppet::Type.type(:gitlab_group).provide(
         params = {
           :private_token => self.class.private_token,
           :name          => group_name,
-          :path          => get_path_for(group_name)
+          :path          => slug_for(group_name)
         }
 
         uri = '/groups'
@@ -154,12 +154,6 @@ Puppet::Type.type(:gitlab_group).provide(
 
     end
 
-  end
-
-  # Returns a path slug created from the given name.
-
-  def get_path_for(name)
-    name.downcase.gsub(/[^a-z0-9]+/, '-').sub(/^-/, '').sub(/-$/, '')
   end
 
 end
