@@ -47,8 +47,8 @@ Puppet::Type.newtype(:gitlab_user_key) do
   # Validation.
 
   validate do
-    unless self[:key] && self[:session] && self[:username]
-      raise Puppet::Error, "key, session and username are required"
+    unless self[:session] && self[:username]
+      raise Puppet::Error, "session and username are required"
     end
   end
 
