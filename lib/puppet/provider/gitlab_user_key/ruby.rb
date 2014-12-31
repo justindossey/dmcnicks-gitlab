@@ -1,5 +1,4 @@
 require 'puppet/provider/gitlab'
-require 'json'
 
 Puppet::Type.type(:gitlab_user_key).provide(
   :ruby,
@@ -50,13 +49,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
     # Before we cycle through the resources we can prefetch all of the
     # defined user records from the API.
     
-    users = []
-
-    response = api_get('/users')
-
-    if response.code == 200
-      users = JSON.parse(response)
-    end
+    users = api_get('/users')
 
     # Now cycle through each declared resource.
  
@@ -78,20 +71,12 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
         foundkey = nil
 
-        uri = "/users/%s/keys" % founduser['id']
+        keys = api_get('/users/%s/keys' % founduser['id'])
 
-        response = api_get(uri)
-
-        if response.code == 200
-
-          keys = JSON.parse(response)
-
-          keys.each do |key|
-            if key['title'] == name
-              foundkey = key.dup
-            end
+        keys.each do |key|
+          if key['title'] == name
+            foundkey = key.dup
           end
-
         end
 
         if foundkey
@@ -150,9 +135,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
         # If the gitlab_user_key resource is now marked as absent but was
         # previously marked as present then delete it from Gitlab.
 
-        uri = '/users/%s/keys/%s' % [ user_id, key_id ]
-
-        api_delete(uri)
+        api_delete('/users/%s/keys/%s' % [ user_id, key_id ])
 
       end
 
@@ -168,9 +151,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
           :title => key_title
         }
 
-        uri = "/users/%s/keys" % user_id
-
-        api_post(uri, params)
+        api_post("/users/%s/keys" % user_id, params)
 
       else
 
@@ -183,9 +164,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
 
           # First delete the key.
 
-          uri = '/users/%s/keys/%s' % [ user_id, key_id ]
-
-          api_delete(uri)
+          api_delete('/users/%s/keys/%s' % [ user_id, key_id ])
 
           # Then create a new key.
 
@@ -194,9 +173,7 @@ Puppet::Type.type(:gitlab_user_key).provide(
             :title => key_title
           }
 
-          uri = "/users/%s/keys" % user_id
-
-          api_post(uri, params)
+          api_post("/users/%s/keys" % user_id, params)
 
         end
 

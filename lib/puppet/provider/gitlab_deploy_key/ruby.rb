@@ -1,5 +1,4 @@
 require 'puppet/provider/gitlab'
-require 'json'
 
 Puppet::Type.type(:gitlab_deploy_key).provide(
   :ruby,
@@ -50,13 +49,7 @@ Puppet::Type.type(:gitlab_deploy_key).provide(
     # Before we cycle through the resources we can prefetch all of the
     # defined project records from the API.
     
-    projects = []
-
-    response = api_get('/projects/all')
-
-    if response.code == 200
-      projects = JSON.parse(response)
-    end
+    projects = api_get('/projects/all')
 
     # Now cycle through each declared resource.
  
@@ -78,20 +71,12 @@ Puppet::Type.type(:gitlab_deploy_key).provide(
 
         foundkey = nil
 
-        uri = "/projects/%s/keys" % foundproject['id']
+        keys = api_get('/projects/%s/keys' % foundproject['id'])
 
-        response = api_get(uri)
-
-        if response.code == 200
-
-          keys = JSON.parse(response)
-
-          keys.each do |key|
-            if key['title'] == name
-              foundkey = key.dup
-            end
+        keys.each do |key|
+          if key['title'] == name
+            foundkey = key.dup
           end
-
         end
 
         if foundkey
@@ -144,9 +129,7 @@ Puppet::Type.type(:gitlab_deploy_key).provide(
         # If the gitlab_deploy_key resource is now marked as absent but was
         # previously marked as present then delete it from Gitlab.
 
-        uri = '/projects/%s/keys/%s' % [ project_id, key_id ]
-
-        api_delete(uri)
+        api_delete('/projects/%s/keys/%s' % [ project_id, key_id ])
 
       end
 
@@ -162,9 +145,7 @@ Puppet::Type.type(:gitlab_deploy_key).provide(
           :title => key_title
         }
 
-        uri = "/projects/%s/keys" % project_id
-
-        api_post(uri, params)
+        api_post('/projects/%s/keys' % project_id, params)
 
       else
 
@@ -177,9 +158,7 @@ Puppet::Type.type(:gitlab_deploy_key).provide(
 
           # First delete the key.
 
-          uri = '/projects/%s/keys/%s' % [ project_id, key_id ]
-
-          api_delete(uri)
+          api_delete('/projects/%s/keys/%s' % [ project_id, key_id ])
 
           # Then create a new key.
 
@@ -188,9 +167,7 @@ Puppet::Type.type(:gitlab_deploy_key).provide(
             :title => key_title
           }
 
-          uri = "/projects/%s/keys" % project_id
-
-          api_post(uri, params)
+          api_post("/projects/%s/keys" % project_id, params)
 
         end
 

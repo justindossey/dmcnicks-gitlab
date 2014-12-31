@@ -1,5 +1,4 @@
 require 'puppet/provider/gitlab'
-require 'json'
 
 Puppet::Type.type(:gitlab_session).provide(
   :ruby,
@@ -70,9 +69,7 @@ Puppet::Type.type(:gitlab_session).provide(
           :password => resource[:new_password]
         }
 
-        uri = '/users/%s' % user_id_for(resource[:login])
-
-        api_put(uri, params)
+        api_put('/users/%s' % user_id_for(resource[:login]), params)
 
       end
 

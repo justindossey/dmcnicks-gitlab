@@ -1,6 +1,4 @@
 require 'puppet/provider/gitlab'
-require 'json'
-require 'pp'
 
 Puppet::Type.type(:gitlab_group).provide(
   :ruby,
@@ -51,13 +49,7 @@ Puppet::Type.type(:gitlab_group).provide(
     # Before we cycle through the resources we can prefetch all of the
     # defined group records from the API.
     
-    groups = []
-
-    response = api_get('/groups')
-
-    if response.code == 200
-      groups = JSON.parse(response)
-    end
+    groups = api_get('/groups')
 
     # Now cycle through each declared resource.
  
@@ -118,9 +110,7 @@ Puppet::Type.type(:gitlab_group).provide(
         # If the gitlab_group resource is now marked as absent but was
         # previously marked as present then delete it from Gitlab.
 
-        uri = '/groups/%s' % group_id
-
-        api_delete(uri)
+        api_delete('/groups/%s' % group_id)
 
       end
 
@@ -136,9 +126,7 @@ Puppet::Type.type(:gitlab_group).provide(
           :path => slug_for(group_name)
         }
 
-        uri = '/groups'
-
-        api_post(uri, params)
+        api_post('/groups', params)
 
         # Groups do not have any modifiable properties so there is no third
         # option of modifying an existing resource here.

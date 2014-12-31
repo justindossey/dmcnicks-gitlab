@@ -1,5 +1,4 @@
 require 'puppet/provider/gitlab'
-require 'json'
 
 Puppet::Type.type(:gitlab_user).provide(
   :ruby,
@@ -50,13 +49,7 @@ Puppet::Type.type(:gitlab_user).provide(
     # Before we cycle through the resources we can prefetch all of the
     # defined user records from the API.
     
-    users = []
-
-    response = api_get('/users')
-
-    if response.code == 200
-      users = JSON.parse(response)
-    end
+    users = api_get('/users')
 
     # Now cycle through each declared resource.
  
@@ -130,9 +123,7 @@ Puppet::Type.type(:gitlab_user).provide(
         # If the gitlab_user resource is now marked as absent but was
         # previously marked as present then delete it from Gitlab.
 
-        uri = '/users/%s' % user_id
-
-        api_delete(uri)
+        api_delete('/users/%s' % user_id)
 
       end
 
@@ -164,9 +155,7 @@ Puppet::Type.type(:gitlab_user).provide(
           params[property] = @property_hash[property]
         end
 
-        uri = '/users/%s' % user_id
-
-        api_put(uri, params)
+        api_put('/users/%s' % user_id, params)
 
       end
 

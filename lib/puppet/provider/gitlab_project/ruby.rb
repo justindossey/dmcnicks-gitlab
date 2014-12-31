@@ -1,5 +1,4 @@
 require 'puppet/provider/gitlab'
-require 'json'
 
 Puppet::Type.type(:gitlab_project).provide(
   :ruby,
@@ -50,13 +49,7 @@ Puppet::Type.type(:gitlab_project).provide(
     # Before we cycle through the resources we can prefetch all of the
     # defined project records from the API.
     
-    projects = []
-
-    response = api_get('/projects/all')
-
-    if response.code == 200
-      projects = JSON.parse(response)
-    end
+    projects = api_get('/projects/all')
 
     # Now cycle through each declared resource.
  
@@ -126,9 +119,7 @@ Puppet::Type.type(:gitlab_project).provide(
         # If the gitlab_project resource is now marked as absent but was
         # previously marked as present then delete it from Gitlab.
 
-        uri = '/projects/%s' % project_id
-
-        api_delete(uri)
+        api_delete('/projects/%s' % project_id)
 
       end
 
@@ -144,24 +135,22 @@ Puppet::Type.type(:gitlab_project).provide(
           :path => slug_for(project_name)
         }
 
-        uri = '/projects'
-
         # If an owner is specified, work out whether the owner is a user or
-        # a group, then modify the API call accordingly.
+        # a group. If the owner is a user, call the user-specific URI. If the
+        # owner is a group, add a :namespace_id parameter.
 
         if project_owner
 
           if id = user_id_for(project_owner)
-            uri = '/projects/user/%s' % id
+            api_post('/projects/user/%s' % id, params)
           end
 
           if id = group_id_for(project_owner)
             params[:namespace_id] = id
+            api_post('/projects', params)
           end
 
         end
-
-        api_post(uri, params)
 
         # Projects do not have modifiable properties so there is no third
         # option of modifying an existing resource here. It would be nice if

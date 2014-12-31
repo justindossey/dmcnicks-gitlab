@@ -6,6 +6,10 @@ class Puppet::Provider::Gitlab < Puppet::Provider
 
   self.const_set(:API_URI, '/api/v3')
 
+  # Shorter version of the OpenSSL::SSL::VERIFY_NONE constant.
+
+  self.const_set(:NONE, OpenSSL::SSL::VERIFY_NONE)
+
   # Initialise the class variables.
 
   self.class_variable_set(:@@private_token, nil)
@@ -17,12 +21,15 @@ class Puppet::Provider::Gitlab < Puppet::Provider
   # hard work is done by the flush method in each provider.
 
   def create
+
     @property_hash[:ensure] = :present
+
     self.class.resource_type.validproperties.each do |property|
       if value = resource.should(property)
         @property_hash[property] = value
       end
     end
+
   end
 
   def destroy
@@ -50,90 +57,136 @@ class Puppet::Provider::Gitlab < Puppet::Provider
   # Methods for interacting with the API.
   #
 
+  # Perform a GET request and return a JSON response.
+
   def self.api_get(uri, params = {})
     
-    api_url = @@site_url + API_URI
-
     params[:private_token] = @@private_token
+
+    url = @@site_url + API_URI + uri
     
-    r = RestClient::Resource.new(api_url + uri,
-                                 :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+    resource = RestClient::Resource.new(url, :verify_ssl => NONE)
     
     begin
-      r.get(params)
+
+      response = resource.get(params)
+
+      if response && response.code == 200
+        return JSON.parse(response)
+      else
+        raise "api_get %s invalid response: %s" % [ uri, response.code ]
+      end
+
     rescue RestClient::Exception => e
+
       raise "api_get %s failed: %s: %s" % [ uri, e.message, e.response ]
+
     end
   
   end
 
+  # Perform a POST request and return a JSON response.
+
   def self.api_post(uri, params = {})
     
-    api_url = @@site_url + API_URI
-
     params[:private_token] = @@private_token
+
+    url = @@site_url + API_URI + uri
     
-    r = RestClient::Resource.new(api_url + uri,
-                                 :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+    resource = RestClient::Resource.new(url, :verify_ssl => NONE)
     
     begin
-      r.post(params)
-    rescue RestClient::Exception => e
-      raise "api_post %s failed: %s: %s" % [ uri, e.message, e.response ]
-    end
 
+      response = resource.post(params)
+
+      if response && response.code == 201
+        return JSON.parse(response)
+      else
+        raise "api_post %s invalid response: %s" % [ uri, response.code ]
+      end
+
+    rescue RestClient::Exception => e
+
+      raise "api_post %s failed: %s: %s" % [ uri, e.message, e.response ]
+
+    end
+  
   end
+
+  # Perform a PUT request and return a JSON response.
 
   def self.api_put(uri, params = {})
-
-    api_url = @@site_url + API_URI
-
+    
     params[:private_token] = @@private_token
 
-    r = RestClient::Resource.new(api_url + uri,
-                                 :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
-
+    url = @@site_url + API_URI + uri
+    
+    resource = RestClient::Resource.new(url, :verify_ssl => NONE)
+    
     begin
-      r.put(params)
-    rescue RestClient::Exception => e
-      raise "api_put %s failed: %s: %s" % [ uri, e.message, e.response ]
-    end
 
+      response = resource.put(params)
+
+      if response && response.code == 200
+        return JSON.parse(response)
+      else
+        raise "api_put %s invalid response: %s" % [ uri, response.code ]
+      end
+
+    rescue RestClient::Exception => e
+
+      raise "api_put %s failed: %s: %s" % [ uri, e.message, e.response ]
+
+    end
+  
   end
+
+  # Perform a DELETE request and return a JSON response.
 
   def self.api_delete(uri, params = {})
-
-    api_url = @@site_url + API_URI
-
+    
     params[:private_token] = @@private_token
 
-    r = RestClient::Resource.new(api_url + uri,
-                                 :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
-
+    url = @@site_url + API_URI + uri
+    
+    resource = RestClient::Resource.new(url, :verify_ssl => NONE)
+    
     begin
-      r.delete(params)
-    rescue RestClient::Exception => e
-      raise "api_delete %s failed: %s: %s" % [ uri, e.message, e.response ]
-    end
 
+      response = resource.delete(params)
+
+      if response && response.code == 200
+        return JSON.parse(response)
+      else
+        raise "api_delete %s invalid response: %s" % [ uri, response.code ]
+      end
+
+    rescue RestClient::Exception => e
+
+      raise "api_delete %s failed: %s: %s" % [ uri, e.message, e.response ]
+
+    end
+  
   end
 
+  # Attempt to login with the given credentials. If successful, return the
+  # private token. If not, return nil.
+
   def self.api_login(login, password)
-
-    api_url = @@site_url + API_URI
-
+    
     params = {
       :login    => login,
       :password => password
     }
 
-    r = RestClient::Resource.new(api_url + '/session',
-                                 :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
-
+    url = @@site_url + API_URI + '/session'
+    
+    resource = RestClient::Resource.new(url, :verify_ssl => NONE)
+    
     begin
 
-      response = r.post(params)
-
+      response = resource.post(params)
+     
     rescue RestClient::Exception => e
 
       # If the post failed specifically because of a 401 unauthorized error
@@ -147,12 +200,16 @@ class Puppet::Provider::Gitlab < Puppet::Provider
 
     end
 
+    # If we get a valid response, parse the output and return the private
+    # token.
+
     if response && response.code == 201
-      session = JSON.parse(response)
-      return session['private_token']
-    else
-      return nil
+      return JSON.parse(response)['private_token']
     end
+  
+    # Otherwise, return nil to signify that the login failed.
+
+    return nil
 
   end
 
@@ -194,15 +251,11 @@ class Puppet::Provider::Gitlab < Puppet::Provider
 
     # Check if the id matches any groups.
 
-    uri = '/groups'
-    response = api_get(uri)
+    groups = api_get('/groups')
 
-    if response.code == 200
-      groups = JSON.parse(response)
-      groups.each do |group|
-        if group['name'] == name
-          return group['id']
-        end
+    groups.each do |group|
+      if group['name'] == name
+        return group['id']
       end
     end
 
@@ -216,15 +269,11 @@ class Puppet::Provider::Gitlab < Puppet::Provider
 
     # Check if the id matches any users.
 
-    uri = '/users'
-    response = api_get(uri)
+    users = api_get('/users')
 
-    if response.code == 200
-      users = JSON.parse(response)
-      users.each do |user|
-        if user['username'] == name
-          return user['id']
-        end
+    users.each do |user|
+      if user['username'] == name
+        return user['id']
       end
     end
 
@@ -238,15 +287,11 @@ class Puppet::Provider::Gitlab < Puppet::Provider
 
     # Check if the id matches any projects.
 
-    uri = '/projects/all'
-    response = api_get(uri)
+    projects = api_get('/projects/all')
 
-    if response.code == 200
-      projects = JSON.parse(response)
-      projects.each do |project|
-        if project['projectname'] == name
-          return project['id']
-        end
+    projects.each do |project|
+      if project['projectname'] == name
+        return project['id']
       end
     end
 
