@@ -21,7 +21,7 @@ Puppet::Type.type(:gitlab_project).provide(
 
   # Store parameters as instance variables.
 
-  attr_accessor :project_id, :project_name, :project_owner, :project_namespace
+  attr_accessor :project_id, :project_name, :project_owner
 
   # Create a new gitlab_project provider.
 
@@ -83,16 +83,21 @@ Puppet::Type.type(:gitlab_project).provide(
         # :present.
 
         properties = {
-          :ensure       => :present,
-          :namespace    => foundproject['namespace']['name']
+          :ensure    => :present
         }
 
         resource.provider = new(properties)
 
         resource.provider.project_id = foundproject['id']
         resource.provider.project_name = foundproject['name']
-        resource.provider.project_name = foundproject['owner']['name']
-        resource.provider.project_namespace = foundproject['namespace']['name']
+
+        if owner = foundproject['owner']['name']
+          resource.provider.owner = owner
+        end
+
+        if namespace = foundproject['namespace']['name']
+          resource.provider.owner = namespace
+        end
 
       else
 
@@ -102,7 +107,6 @@ Puppet::Type.type(:gitlab_project).provide(
 
         resource.provider.project_name = name
         resource.provider.project_owner = resource[:owner]
-        resource.provider.project_namespace = resource[:namespace]
 
       end
 
@@ -146,16 +150,24 @@ Puppet::Type.type(:gitlab_project).provide(
         params = {
           :private_token => self.class.private_token,
           :name          => project_name,
-          :path          => get_path_for(project_name),
-          :namespace_id  => get_namespace_id(project_namespace)
+          :path          => get_path_for(project_name)
         }
 
         uri = '/projects'
 
-        # If an owner is specified, create the project as that owner.
+        # If an owner is specified, work out whether the owner is a user or
+        # a group, then modify the API call accordingly.
 
         if project_owner
-          uri = '/projects/user/%s' % get_user_id(project_owner)
+
+          if id = get_user_id(project_owner)
+            uri = '/projects/user/%s' % id
+          end
+
+          if id = get_group_id(project_owner)
+            params[:namespace_id] = id
+          end
+
         end
 
         RestClient.post(self.class.api_url + uri, params)
@@ -175,15 +187,6 @@ Puppet::Type.type(:gitlab_project).provide(
 
   def get_path_for(name)
     name.downcase.gsub(/[^a-z0-9]+/, '-').sub(/^-/, '').sub(/-$/, '')
-  end
-
-  # Returns the ID of the namespace with the given name. For projects, a
-  # namespace can either be a group or an individual user so both have to
-  # be searched.
-
-  def get_namespace_id(name)
-    id = get_group_id(name)
-    id ? id : get_user_id(name)
   end
 
   # Returns the group ID of the given group.
