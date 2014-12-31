@@ -140,9 +140,8 @@ Puppet::Type.type(:gitlab_project).provide(
         # previously marked as absent then create it in Gitlab.
  
         params = {
-          :private_token => self.class.private_token,
-          :name          => project_name,
-          :path          => slug_for(project_name)
+          :name => project_name,
+          :path => slug_for(project_name)
         }
 
         uri = '/projects'

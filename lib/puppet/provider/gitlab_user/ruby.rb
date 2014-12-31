@@ -144,11 +144,10 @@ Puppet::Type.type(:gitlab_user).provide(
         # previously marked as absent then create it in Gitlab.
  
         params = {
-          :private_token => self.class.private_token,
-          :username      => username,
-          :password      => @property_hash[:password],
-          :email         => @property_hash[:email],
-          :name          => @property_hash[:fullname]
+          :username => username,
+          :password => @property_hash[:password],
+          :email    => @property_hash[:email],
+          :name     => @property_hash[:fullname]
         }
 
         api_post('/users', params)

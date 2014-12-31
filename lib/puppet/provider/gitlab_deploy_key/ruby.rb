@@ -158,9 +158,8 @@ Puppet::Type.type(:gitlab_deploy_key).provide(
         # previously marked as absent then create it in Gitlab.
  
         params = {
-          :private_token => self.class.private_token,
-          :key           => @property_hash[:key],
-          :title         => key_title
+          :key   => @property_hash[:key],
+          :title => key_title
         }
 
         uri = "/projects/%s/keys" % project_id
@@ -185,9 +184,8 @@ Puppet::Type.type(:gitlab_deploy_key).provide(
           # Then create a new key.
 
           params = {
-            :private_token => self.class.private_token,
-            :key           => @property_hash[:key],
-            :title         => key_title
+            :key   => @property_hash[:key],
+            :title => key_title
           }
 
           uri = "/projects/%s/keys" % project_id
