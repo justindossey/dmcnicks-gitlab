@@ -47,8 +47,8 @@ Puppet::Type.newtype(:gitlab_deploy_key) do
   # Validation.
 
   validate do
-    unless self[:key] && self[:session] && self[:project]
-      raise Puppet::Error, "key, session and project are required"
+    unless self[:session] && self[:project]
+      raise Puppet::Error, "session and project are required"
     end
   end
 
