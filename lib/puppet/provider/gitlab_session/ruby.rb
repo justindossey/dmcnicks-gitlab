@@ -54,7 +54,7 @@ Puppet::Type.type(:gitlab_session).provide(
 
       # Set the API token.
 
-      this.private_token = token
+      self.private_token = token
 
       # Create the new resource.
 
