@@ -68,7 +68,7 @@ Puppet::Type.type(:gitlab_session).provide(
 
       else
 
-        raise Puppet::Error, 'Gitlab login for session %s failed' % name
+        raise Puppet::Error, "Gitlab login for session '%s' failed" % name
 
       end
 
