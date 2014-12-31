@@ -48,6 +48,9 @@ Puppet::Type.newtype(:gitlab_project) do
     unless self[:session]
       raise Puppet::Error, "session is required"
     end
+    if self[:owner] && self[:namespace]
+      raise Puppet::Error, "cannot specify both owner and namespace"
+    end
   end
 
   # Autorequires.
