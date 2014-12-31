@@ -55,7 +55,7 @@ Puppet::Type.type(:gitlab_session).provide(
 
       # Set the private token and API URL if logged in successfully.
 
-      if response.code == 201
+      if response && response.code == 201
 
         session = JSON.parse(response)
 
