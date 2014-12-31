@@ -83,7 +83,8 @@ Puppet::Type.type(:gitlab_user).provide(
           :id       => founduser['id'],
           :username => founduser['username'],
           :email    => founduser['email'],
-          :fullname => founduser['name']
+          :fullname => founduser['name'],
+          :password => resource['password']
         }
 
         resource.provider = new(properties)
