@@ -27,6 +27,11 @@ class Puppet::Provider::Gitlab < Puppet::Provider
     @property_hash[:ensure] != :absent
   end
 
+  #
+  # Class methods that give provider subclasses access to the shared
+  # private_token and api_url class variables.
+  #
+
   def self.private_token
     @@private_token
   end
@@ -41,6 +46,68 @@ class Puppet::Provider::Gitlab < Puppet::Provider
 
   def self.api_url=(value)
     @@api_url = value
+  end
+
+  #
+  # Utility class methods for provider subclasses.
+  #
+
+  # Returns a slug created from the given name.
+
+  def self.slug_for(name)
+    name.downcase.gsub(/[^a-z0-9]+/, '-').sub(/^-/, '').sub(/-$/, '')
+  end
+
+  # Returns the group ID of the given group.
+
+  def self.group_id_for(name)
+
+    params = {
+      :private_token => self.private_token
+    }
+
+    # Check if the id matches any groups.
+
+    uri = '/groups'
+    response = RestClient.get(self.api_url + uri, params)
+
+    if response.code == 200
+      groups = JSON.parse(response)
+      groups.each do |group|
+        if group['name'] == name
+          return group['id']
+        end
+      end
+    end
+
+    return nil
+
+  end
+
+  # Returns the user ID of the given user.
+
+  def self.user_id_for(name)
+
+    params = {
+      :private_token => self.private_token
+    }
+
+    # Check if the id matches any users.
+
+    uri = '/users'
+    response = RestClient.get(self.api_url + uri, params)
+
+    if response.code == 200
+      users = JSON.parse(response)
+      users.each do |user|
+        if user['username'] == name
+          return user['id']
+        end
+      end
+    end
+
+    return nil
+
   end
 
 end
