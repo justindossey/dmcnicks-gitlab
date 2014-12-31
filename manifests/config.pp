@@ -47,10 +47,8 @@ class gitlab::config (
 
   # Login to the Gitlab API and change the password if it has been specified.
 
-  $api_url = "${gitlab_url}/api/v3"
-
   gitlab_session { 'initial-gitlab-config':
-    url          => $api_url,
+    url          => $gitlab_url,
     login        => $api_login,
     password     => $api_password,
     new_password => $new_password
