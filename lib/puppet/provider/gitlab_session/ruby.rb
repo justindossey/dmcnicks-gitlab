@@ -31,6 +31,8 @@ Puppet::Type.type(:gitlab_session).provide(
   
       # Try to login with the current password first.
       
+      change_password = false
+
       begin
 
         params = {
@@ -41,13 +43,15 @@ Puppet::Type.type(:gitlab_session).provide(
         uri = '/session'
         response = RestClient.post(resource[:url] + uri, params)
 
+        change_password = resource[:new_password] != nil
+
       rescue
 
-        # If that fails, try logging in with the previous password if it has
+        # If that fails, try logging in with the new password if it has
         # been set.
  
-        if resource[:previous_password]
-          params[:password] = resource[:previous_password]
+        if resource[:new_password]
+          params[:password] = resource[:new_password]
           response = RestClient.post(resource[:url] + uri, params)
         end
 
@@ -67,6 +71,21 @@ Puppet::Type.type(:gitlab_session).provide(
       # Create the new resource.
 
       resource.provider = new
+
+      # Change the password if required.
+
+      if change_password && resource[:new_password] != resource[:password]
+
+        params = {
+          :private_token => self.private_token,
+          :password      => resource[:new_password]
+        }
+
+        uri = '/users/%s' % self.user_id_for(resource[:login])
+
+        RestClient.put(self.api_url + uri, params)
+
+      end
 
     end
 

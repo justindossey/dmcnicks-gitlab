@@ -39,8 +39,13 @@ Puppet::Type.newtype(:gitlab_session) do
     desc 'The password for the API login'
   end
 
-  newparam(:previous_password) do
-    desc 'The password for the API login'
+  newparam(:new_password) do
+    desc 'Set a new password for the API login'
+    validate do |value|
+      if value && value.length < 8
+        raise ArgumentError , "password is too short (minimum is 8 characters)"
+      end
+    end
   end
 
   # Validation.
