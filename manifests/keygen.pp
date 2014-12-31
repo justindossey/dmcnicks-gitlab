@@ -28,13 +28,15 @@ define gitlab::keygen (
 
   file { $ssh_dir:
     ensure => 'directory',
-    owner => $title,
-    mode => '0600'
+    owner  => $title,
+    mode   => '0600'
   } ->
 
+  keygen_args = "-t ${type} -b ${bits} -N '' -C ${comment} -f \"${file}\""
+
   exec { "keygen-${title}":
-    path    => [ "/bin", "/usr/bin" ],
-    command => "ssh-keygen -t ${type} -b ${bits} -N '' -C ${comment} -f \"${file}\"",
+    path    => [ '/bin', '/usr/bin' ],
+    command => "ssh-keygen ${gitlab::keygen::keygen_args}",
     user    => $title,
     creates => $file
   }
