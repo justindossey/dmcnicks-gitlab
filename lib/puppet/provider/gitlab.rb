@@ -49,6 +49,72 @@ class Puppet::Provider::Gitlab < Puppet::Provider
   end
 
   #
+  # Methods for interacting with the API.
+  #
+
+  def self.api_get(uri, params = {})
+    params[:private_token] = self.private_token
+    r = RestClient::Resource.new(self.api_url + uri,
+                                 :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+    begin
+      r.get(params)
+    rescue RestClient::Exception => e
+      raise "api_get %s failed: %s: %s" % [ uri, e.message, e.response ]
+    end
+  end
+
+  def self.api_post(uri, params = {})
+    params[:private_token] = self.private_token
+    r = RestClient::Resource.new(self.api_url + uri,
+                                 :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+    begin
+      r.post(params)
+    rescue RestClient::Exception => e
+      raise "api_post %s failed: %s: %s" % [ uri, e.message, e.response ]
+    end
+  end
+
+  def self.api_put(uri, params = {})
+    params[:private_token] = self.private_token
+    r = RestClient::Resource.new(self.api_url + uri,
+                                 :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+    begin
+      r.put(params)
+    rescue RestClient::Exception => e
+      raise "api_put %s failed: %s: %s" % [ uri, e.message, e.response ]
+    end
+  end
+
+  def self.api_delete(uri, params = {})
+    params[:private_token] = self.private_token
+    r = RestClient::Resource.new(self.api_url + uri,
+                                 :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+    begin
+      r.delete(params)
+    rescue RestClient::Exception => e
+      raise "api_delete %s failed: %s: %s" % [ uri, e.message, e.response ]
+    end
+  end
+
+  # Instance method equivalents for the above methods.
+
+  def api_get(uri, params = {})
+    self.class.api_get(uri, params)
+  end
+
+  def api_post(uri, params = {})
+    self.class.api_post(uri, params)
+  end
+
+  def api_put(uri, params = {})
+    self.class.api_put(uri, params)
+  end
+
+  def api_delete(uri, params = {})
+    self.class.api_delete(uri, params)
+  end
+
+  #
   # Utility methods for provider subclasses.
   #
 
@@ -62,14 +128,10 @@ class Puppet::Provider::Gitlab < Puppet::Provider
 
   def self.group_id_for(name)
 
-    params = {
-      :private_token => self.private_token
-    }
-
     # Check if the id matches any groups.
 
     uri = '/groups'
-    response = RestClient.get(self.api_url + uri, params)
+    response = api_get(uri)
 
     if response.code == 200
       groups = JSON.parse(response)
@@ -88,14 +150,10 @@ class Puppet::Provider::Gitlab < Puppet::Provider
 
   def self.user_id_for(name)
 
-    params = {
-      :private_token => self.private_token
-    }
-
     # Check if the id matches any users.
 
     uri = '/users'
-    response = RestClient.get(self.api_url + uri, params)
+    response = api_get(uri)
 
     if response.code == 200
       users = JSON.parse(response)
@@ -114,14 +172,10 @@ class Puppet::Provider::Gitlab < Puppet::Provider
 
   def self.project_id_for(name)
 
-    params = {
-      :private_token => self.private_token
-    }
-
     # Check if the id matches any projects.
 
     uri = '/projects/all'
-    response = RestClient.get(self.api_url + uri, params)
+    response = api_get(uri)
 
     if response.code == 200
       projects = JSON.parse(response)
@@ -139,19 +193,19 @@ class Puppet::Provider::Gitlab < Puppet::Provider
   # Create equivalent instance methods for the above class methods.
 
   def slug_for(name)
-    return self.class.slug_for(name)
+    self.class.slug_for(name)
   end
 
   def group_id_for(name)
-    return self.class.group_id_for(name)
+    self.class.group_id_for(name)
   end
 
   def user_id_for(name)
-    return self.class.user_id_for(name)
+    self.class.user_id_for(name)
   end
 
   def project_id_for(name)
-    return self.class.project_id_for(name)
+    self.class.project_id_for(name)
   end
 
 end
