@@ -33,47 +33,23 @@ Puppet::Type.type(:gitlab_session).provide(
 
       self.api_url = resource[:url]
 
-      # Try to login with the current password first.
-      
-      change_password = false
+      # Attempt to login.
 
-      begin
+      token = api_login(resource[:login], resource[:password])
 
-        params = {
-          :login    => resource[:login],
-          :password => resource[:password]
-        }
+      # Mark the password to be changed if the login succeeded and a new
+      # password has been specified.
 
-        uri = '/session'
+      change_password = token && resource[:new_password]
 
-        response = api_post(uri, params)
+      # If the login failed try logging in with the new password instead.
 
-        change_password = resource[:new_password] != nil
+      token = api_login(resource[:login], resource[:new_password])
 
-      rescue
+      # Raise an exception if the login failed with the new password too.
 
-        # If that fails, try logging in with the new password if it has
-        # been set.
- 
-        if resource[:new_password]
-          params[:password] = resource[:new_password]
-          response = api_post(uri, params)
-        end
-
-      end
-
-      # Set the private token and API URL if logged in successfully.
-
-      if response && response.code == 201
-
-        session = JSON.parse(response)
-
-        self.private_token = session['private_token']
-
-      else
-
+      unless token
         raise Puppet::Error, "Gitlab login for session '%s' failed" % name
-
       end
 
       # Create the new resource.

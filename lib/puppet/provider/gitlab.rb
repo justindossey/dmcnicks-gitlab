@@ -1,3 +1,5 @@
+require 'json'
+
 class Puppet::Provider::Gitlab < Puppet::Provider
 
   # Initialise the class variables.
@@ -53,47 +55,99 @@ class Puppet::Provider::Gitlab < Puppet::Provider
   #
 
   def self.api_get(uri, params = {})
+    
     params[:private_token] = self.private_token
+    
     r = RestClient::Resource.new(self.api_url + uri,
                                  :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+    
     begin
       r.get(params)
     rescue RestClient::Exception => e
       raise "api_get %s failed: %s: %s" % [ uri, e.message, e.response ]
     end
+  
   end
 
   def self.api_post(uri, params = {})
+    
     params[:private_token] = self.private_token
+    
     r = RestClient::Resource.new(self.api_url + uri,
                                  :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+    
     begin
       r.post(params)
     rescue RestClient::Exception => e
       raise "api_post %s failed: %s: %s" % [ uri, e.message, e.response ]
     end
+
   end
 
   def self.api_put(uri, params = {})
+
     params[:private_token] = self.private_token
+
     r = RestClient::Resource.new(self.api_url + uri,
                                  :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+
     begin
       r.put(params)
     rescue RestClient::Exception => e
       raise "api_put %s failed: %s: %s" % [ uri, e.message, e.response ]
     end
+
   end
 
   def self.api_delete(uri, params = {})
+
     params[:private_token] = self.private_token
+
     r = RestClient::Resource.new(self.api_url + uri,
                                  :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+
     begin
       r.delete(params)
     rescue RestClient::Exception => e
       raise "api_delete %s failed: %s: %s" % [ uri, e.message, e.response ]
     end
+
+  end
+
+  def self.api_login(login, password)
+
+    params = {
+      :login    => login,
+      :password => password
+    }
+
+    r = RestClient::Resource.new(self.api_url + '/session',
+                                 :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+
+    begin
+
+      response = r.post(params)
+
+    rescue RestClient::Exception => e
+
+      # If the post failed specifically because of a 401 unauthorized error
+      # then return nil to signify that the login failed.
+
+      if e.http_code == 401
+        return nil
+      else
+        raise "api_login %s failed: %s: %s" % [ login, e.message, e.response ]
+      end
+
+    end
+
+    if response && response.code == 201
+      session = JSON.parse(response)
+      return session['private_token']
+    else
+      return nil
+    end
+
   end
 
   # Instance method equivalents for the above methods.
@@ -112,6 +166,10 @@ class Puppet::Provider::Gitlab < Puppet::Provider
 
   def api_delete(uri, params = {})
     self.class.api_delete(uri, params)
+  end
+
+  def api_login(login, password)
+    self.class.api_login(login, password)
   end
 
   #
