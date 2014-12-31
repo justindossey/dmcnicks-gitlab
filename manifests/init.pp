@@ -81,9 +81,9 @@ class gitlab (
   # Configure Gitlab.
 
   class { 'gitlab::config':
-    gitlab_url       => $gitlab_url,
-    api_login        => $api_login,
-    api_password     => $api_password,
-    new_password     => $new_password 
+    gitlab_url   => $gitlab_url,
+    api_login    => $api_login,
+    api_password => $api_password,
+    new_password => $new_password 
   }
 }
