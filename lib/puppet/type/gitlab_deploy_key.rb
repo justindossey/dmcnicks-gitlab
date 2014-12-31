@@ -4,20 +4,13 @@ Puppet::Type.newtype(:gitlab_deploy_key) do
 
   ensurable
 
+  # Parameters.
+
   newparam(:name) do
     desc 'The name of the resource'
     validate do |value|
       unless value =~ /^[\w@\.\-_ ]+$/
         raise ArgumentError , "%s is not a valid deploy key name" % value
-      end
-    end
-  end
-
-  newproperty(:key) do
-    desc 'The key itself'
-    validate do |value|
-      unless value =~ /^ssh-[dr]sa [^ ]+ [\w@\.\-_]+$/
-        raise ArgumentError , "%s is not a valid deploy key" % value
       end
     end
   end
@@ -40,11 +33,26 @@ Puppet::Type.newtype(:gitlab_deploy_key) do
     end
   end
 
+  # Properties.
+
+  newproperty(:key) do
+    desc 'The key itself'
+    validate do |value|
+      unless value =~ /^ssh-[dr]sa [^ ]+ [\w@\.\-_]+$/
+        raise ArgumentError , "%s is not a valid deploy key" % value
+      end
+    end
+  end
+
+  # Validation.
+
   validate do
     unless self[:key] && self[:session] && self[:project]
       raise Puppet::Error, "key, session and project are required"
     end
   end
+
+  # Autorequires.
 
   autorequire(:gitlab_session) do
     [ self[:session] ]

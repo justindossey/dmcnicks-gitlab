@@ -4,6 +4,8 @@ Puppet::Type.newtype(:gitlab_group) do
 
   ensurable
 
+  # Parameters.
+
   newparam(:name) do
     desc 'The name of the group'
     validate do |value|
@@ -22,13 +24,18 @@ Puppet::Type.newtype(:gitlab_group) do
     end
   end
 
-  autorequire(:gitlab_session) do
-    [ self[:session] ]
-  end
+  # Validation.
 
   validate do
     unless self[:session]
       raise Puppet::Error, "session is required"
     end
   end
+
+  # Autorequires.
+
+  autorequire(:gitlab_session) do
+    [ self[:session] ]
+  end
+
 end

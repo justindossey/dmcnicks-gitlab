@@ -4,6 +4,8 @@ Puppet::Type.newtype(:gitlab_user) do
 
   ensurable
 
+  # Parameters.
+  
   newparam(:username, :namevar => true) do
     desc 'The name of the user'
     validate do |value|
@@ -21,6 +23,8 @@ Puppet::Type.newtype(:gitlab_user) do
       end
     end
   end
+
+  # Properties.
 
   newproperty(:email) do
     desc 'The email address of the user'
@@ -44,13 +48,18 @@ Puppet::Type.newtype(:gitlab_user) do
     end
   end
 
-  autorequire(:gitlab_session) do
-    [ self[:session] ]
-  end
-
+  # Validation.
+  
   validate do
     unless self[:session]
       raise Puppet::Error, "session is required"
     end
   end
+
+  # Autorequires.
+
+  autorequire(:gitlab_session) do
+    [ self[:session] ]
+  end
+
 end

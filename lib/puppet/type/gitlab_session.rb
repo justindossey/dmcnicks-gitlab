@@ -2,6 +2,12 @@ Puppet::Type.newtype(:gitlab_session) do
 
   desc 'A Gitlab session'
 
+  # Note that gitlab_session is not ensurable. That is because it does not
+  # represent any data stored within Gitlab. It performs a login during 
+  # prefetch, stores the private token then does nothing else.
+
+  # Parameters.
+
   newparam(:name) do
     desc 'The name of this Gitlab session'
     validate do |value|
@@ -37,9 +43,12 @@ Puppet::Type.newtype(:gitlab_session) do
     desc 'The password for the API login'
   end
 
+  # Validation.
+
   validate do
     unless self[:url] and self[:login] and self[:password]
       raise Puppet::Error, "url, login and password are required"
     end
   end
+
 end
