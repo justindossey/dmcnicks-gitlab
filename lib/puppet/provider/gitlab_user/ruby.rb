@@ -19,9 +19,9 @@ Puppet::Type.type(:gitlab_user).provide(
     end
   end  
 
-  # Store the user ID parameter as instance variables.
+  # Store parameters as instance variables.
 
-  attr_accessor :user_id
+  attr_accessor :username, :user_id
 
   # Create a new gitlab_user provider.
 
@@ -102,6 +102,7 @@ Puppet::Type.type(:gitlab_user).provide(
         }
 
         resource.provider = new(properties)
+        resource.provider.username = founduser['username']
         resource.provider.user_id = founduser['id']
 
       else
@@ -109,6 +110,7 @@ Puppet::Type.type(:gitlab_user).provide(
         # If not, create a provider with :ensure set to :absent.
 
         resource.provider = new(:ensure => :absent)
+        resource.provider.username = name
 
       end
 
@@ -151,7 +153,7 @@ Puppet::Type.type(:gitlab_user).provide(
  
         params = {
           :private_token => self.class.private_token,
-          :username      => @property_hash[:name],
+          :username      => username,
           :password      => @property_hash[:password],
           :email         => @property_hash[:email],
           :name          => @property_hash[:fullname]
