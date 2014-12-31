@@ -2,7 +2,7 @@
   "name": "dmcnicks-gitlab",
   "version": "1.0.0",
   "author": "dmcnicks",
-  "summary": "Puppet module that installs Omnibus Gitlab and provides defined types for creating projects and users",
+  "summary": "Installs and configures Omnibus Gitlab and provides custom types for creating projects and users",
   "license": "Apache-2.0",
   "source": "https://github.com/dmcnicks/dmcnicks-gitlab",
   "project_page": "https://github.com/dmcnicks/dmcnicks-gitlab",
