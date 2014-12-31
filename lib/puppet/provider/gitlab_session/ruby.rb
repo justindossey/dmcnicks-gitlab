@@ -66,6 +66,10 @@ Puppet::Type.type(:gitlab_session).provide(
         self.private_token = session['private_token']
         self.api_url = resource[:url]
 
+      else
+
+        raise Puppet::Error, 'Gitlab login for session %s failed' % name
+
       end
 
       # Create the new resource.
