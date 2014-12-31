@@ -52,9 +52,10 @@ class gitlab::config (
   # Login to the Gitlab API.
 
   gitlab_session { 'config':
-    api_url      => $api_url,
-    api_login    => $api_login,
-    api_password => $default_password
+    url               => $api_url,
+    login             => $api_login,
+    password          => 'foobar22',
+    previous_password => $default_password
   }
 
   # Change the default Gitlab password.
@@ -62,10 +63,11 @@ class gitlab::config (
   gitlab_user { 'root':
     ensure       => 'present',
     session      => 'config',
+    fullname     => 'George Foo',
     password     => 'foobar22'
   }
 
-  gitlab_project { 'My Project':
+  gitlab_project { 'My Other Project':
     ensure => 'present',
     session => 'config'
   }

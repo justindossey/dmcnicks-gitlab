@@ -1,6 +1,5 @@
 require 'puppet/provider/gitlab'
 require 'json'
-require 'pp'
 
 Puppet::Type.type(:gitlab_session).provide(
   :ruby,
@@ -30,17 +29,29 @@ Puppet::Type.type(:gitlab_session).provide(
 
     resources.each do |name, resource|
   
-      # Login to the API.
+      # Try to login with the current password first.
       
-      params = {
-        :login    => resource[:api_login],
-        :password => resource[:api_password]
-      }
+      begin
 
-      result = {}
+        params = {
+          :login    => resource[:login],
+          :password => resource[:password]
+        }
 
-      uri = '/session'
-      response = RestClient.post(resource[:api_url] + uri, params)
+        uri = '/session'
+        response = RestClient.post(resource[:url] + uri, params)
+
+      rescue
+
+        # If that fails, try logging in with the previous password if it has
+        # been set.
+ 
+        if resource[:previous_password]
+          params[:password] => resource[:previous_password]
+          response = RestClient.post(resource[:url] + uri, params)
+        end
+
+      end
 
       # Set the private token and API URL if logged in successfully.
 
@@ -49,7 +60,7 @@ Puppet::Type.type(:gitlab_session).provide(
         session = JSON.parse(response)
 
         self.private_token = session['private_token']
-        self.api_url = resource[:api_url]
+        self.api_url = resource[:url]
 
       end
 

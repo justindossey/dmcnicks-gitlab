@@ -2,7 +2,7 @@ Puppet::Type.newtype(:gitlab_session) do
 
   desc 'A Gitlab session'
 
-  newparam(:session, :namevar => true) do
+  newparam(:name) do
     desc 'The name of this Gitlab session'
     validate do |value|
       unless value =~ /^[\w\-_ ]+$/
@@ -11,7 +11,7 @@ Puppet::Type.newtype(:gitlab_session) do
     end
   end
 
-  newparam(:api_url) do
+  newparam(:url) do
     desc 'The URL of the Gitlab API'
     validate do |value|
       unless value =~ /^http(s)?:\/\/(\w+)(\.\w+)+(\/)?/
@@ -20,7 +20,7 @@ Puppet::Type.newtype(:gitlab_session) do
     end
   end
 
-  newparam(:api_login) do
+  newparam(:login) do
     desc 'The login to use to connect to the Gitlab API'
     validate do |value|
       unless value =~ /^\w+$/
@@ -29,13 +29,17 @@ Puppet::Type.newtype(:gitlab_session) do
     end
   end
 
-  newparam(:api_password) do
+  newparam(:password) do
+    desc 'The password for the API login'
+  end
+
+  newparam(:previous_password) do
     desc 'The password for the API login'
   end
 
   validate do
-    unless self[:api_url] and self[:api_login] and self[:api_password]
-      raise Puppet::Error, "api_url, api_login, api_password are required"
+    unless self[:url] and self[:login] and self[:password]
+      raise Puppet::Error, "url, login and password are required"
     end
   end
 end
