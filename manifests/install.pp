@@ -102,9 +102,19 @@ class gitlab::install (
   # Run the post-install configuration if the installer has been run.
 
   exec { 'gitlab-postinstall':
-    path    => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
-    command => 'gitlab-ctl reconfigure',
+    path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
+    command     => 'gitlab-ctl reconfigure',
     refreshonly => true,
-    require => Exec['gitlab-install']
+    require     => Exec['gitlab-install'],
+    notify      => Exec['gitlab-restart']
   }
+
+  # Restart after post-install.
+
+  exec { 'gitlab-restart':
+    path    => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
+    command => 'gitlab-ctl restart',
+    refreshonly => true
+  }
+
 }
