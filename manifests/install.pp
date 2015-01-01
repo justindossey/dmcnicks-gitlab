@@ -61,7 +61,7 @@ class gitlab::install (
         cnf_tpl      => 'openssl/cert.cnf.erb',
         notify       => Exec['gitlab-postinstall'],
         base_dir     => $ssl_cert_dir,
-        require      => File[$ssl_cert_dir]
+        require      => [ File[$ssl_cert_dir], Exec['gitlab-postinstall'] ]
     }
   }
 
@@ -92,6 +92,7 @@ class gitlab::install (
     ensure  => 'present',
     content => template('gitlab/gitlab.rb.erb'),
     mode    => '0600',
+    require => Exec['gitlab-install'],
     notify  => Exec['gitlab-postinstall']
   }
 
