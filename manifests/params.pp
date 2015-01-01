@@ -37,10 +37,10 @@ class gitlab::params () {
 
   $download_url = $::osfamily ? {
     'Debian' => $::operatingsystem ? {
-      'Debian' => $::operatingsystemmajrelease ? {
+      'Debian' => $::lsbmajdistrelease ? {
         '7' => 'https://downloads-packages.s3.amazonaws.com/debian-7.7/gitlab_7.6.1-omnibus.5.3.0.ci.1-1_amd64.deb'
       },
-      'Ubuntu' => $::operatingsystemmajrelease ? {
+      'Ubuntu' => $::lsbmajdistrelease ? {
         '12' => 'https://downloads-packages.s3.amazonaws.com/ubuntu-12.04/gitlab_7.6.1-omnibus.5.3.0.ci.1-1_amd64.deb',
         '14' => 'https://downloads-packages.s3.amazonaws.com/ubuntu-14.04/gitlab_7.6.1-omnibus.5.3.0.ci.1-1_amd64.deb'
       }
