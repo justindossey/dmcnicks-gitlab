@@ -32,6 +32,11 @@
 # [*new_password*]
 #   The new password for the admin user, which will be set if specified.
 #
+# [*add_root_pubkey*]
+#   If true, the SSH public key for the root user will be associated with the
+#   root user in Gitlab. If the root user does not have an SSH keypair, one
+#   will be generated.
+#
 # === Authors
 #
 # David McNicol <david@mcnicks.org>
@@ -50,7 +55,8 @@ class gitlab (
   $ssl = $gitlab::params::ssl,
   $api_login = $gitlab::params::api_login,
   $api_password = $gitlab::params::api_password,
-  $new_password = false
+  $new_password = false,
+  $add_root_pubkey = false,
 ) inherits gitlab::params {
   
   # Work out what the Gitlab URL will be.
@@ -80,10 +86,11 @@ class gitlab (
   # Configure Gitlab.
 
   class { 'gitlab::config':
-    gitlab_url   => $gitlab_url,
-    api_login    => $api_login,
-    api_password => $api_password,
-    new_password => $new_password,
-    require      => Class['gitlab::install']
+    gitlab_url      => $gitlab_url,
+    api_login       => $api_login,
+    api_password    => $api_password,
+    new_password    => $new_password,
+    add_root_pubkey => $add_root_pubkey,
+    require         => Class['gitlab::install']
   }
 }

@@ -16,6 +16,11 @@
 # [*new_password*]
 #   The new password for the admin user, which will be set if specified.
 #
+# [*add_root_pubkey*]
+#   If true, the SSH public key for the root user will be associated with the
+#   root user in Gitlab. If the root user does not have an SSH keypair, one
+#   will be generated.
+#
 # === Authors
 #
 # David McNicol <david@mcnicks.org>
@@ -29,7 +34,8 @@ class gitlab::config (
   $gitlab_url,
   $api_login,
   $api_password,
-  $new_password
+  $new_password,
+  $add_root_pubkey
 ) {
 
   # The Gitlab configuration providers require the Ruby rest-client gem. Note
@@ -54,37 +60,25 @@ class gitlab::config (
     new_password => $new_password
   }
 
-  # Generate a public key for the root user if necessary.
+  if str2bool($add_root_pubkey) {
 
-  gitlab::keygen { 'root':
-    homedir => '/root'
-  }
+    # Generate a public key for the root user if necessary.
 
-  # If a root public key is available on the node, add it to the root Gitlab
-  # user.
-
-  if $gitlab_root_rsapubkey {
-
-    gitlab_user_key { "root-${fqdn}":
-      ensure   => 'present',
-      session  => 'initial-gitlab-config',
-      username => 'root',
-      key      => $gitlab_root_rsapubkey
+    gitlab::keygen { 'root':
+      homedir => '/root'
     }
-  }
 
-  # If a root public key is available on the Puppet master, add it to the root
-  # Gitlab user as well.
+    # If a root public key is available on the node, add it to the root Gitlab
+    # user.
 
-  $master_pubkey = puppet_root_rsapubkey()
+    if $gitlab_root_rsapubkey {
 
-  if $master_pubkey and $master_pubkey != $gitlab_root_pubkey {
-
-    gitlab_user_key { 'root-master':
-      ensure   => 'present',
-      session  => 'initial-gitlab-config',
-      username => 'root',
-      key      => $master_pubkey
+      gitlab_user_key { "root-${fqdn}":
+        ensure   => 'present',
+        session  => 'initial-gitlab-config',
+        username => 'root',
+        key      => $gitlab_root_rsapubkey
+      }
     }
   }
 }
