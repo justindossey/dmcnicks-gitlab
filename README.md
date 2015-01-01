@@ -37,7 +37,7 @@ All of the defined types use the Gitlab REST API and require the `rest-client` r
       provider => 'gem'
     }
 
-This package is required by the `gitlab` module so it will be installed. However, it will not be available to the custom types on the first Puppet agent run, since custom types are loaded before package declarations are processed.
+This package is declared by the `gitlab` module so it will be installed. However, it will not be available to the custom types on the first Puppet agent run, since custom types are loaded before package declarations are processed.
 
 #### The `gitlab_session` type
 
