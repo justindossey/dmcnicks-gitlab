@@ -45,7 +45,7 @@ class gitlab::config (
     provider => 'gem'
   }
 
-  notice( "TEST ${gitlab_root_pubkey} )
+  notice( "TEST ${gitlab_root_pubkey}" )
 
   # Login to the Gitlab API and change the password if it has been specified.
 
