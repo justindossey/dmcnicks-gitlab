@@ -26,15 +26,14 @@
 #
 
 define gitlab::keygen (
-  $homedir = "/home/${name}",
-  $comment = "${name}@${::fqdn}",
+  $homedir = "/home/${title}",
+  $comment = "${title}@${::fqdn}",
   $type = 'rsa',
   $bits = '2048'
 ) {
 
   $ssh_dir = "${homedir}/.ssh"
   $file = "${ssh_dir}/id_${type}"
-  $args = "-t ${type} -b ${bits} -N '' -C ${comment} -f \"${file}\""
 
   file { $ssh_dir:
     ensure => 'directory',
@@ -42,9 +41,9 @@ define gitlab::keygen (
     mode   => '0600'
   }
 
-  exec { "keygen-${name}":
+  exec { "keygen-${title}":
     path    => [ '/bin', '/usr/bin' ],
-    command => "ssh-keygen ${gitlab::keygen::args}",
+    command => "ssh-keygen -t ${type} -b ${bits} -N '' -C ${comment} -f \"${file}\"",
     user    => $title,
     creates => $file,
     require => File[$ssh_dir]
