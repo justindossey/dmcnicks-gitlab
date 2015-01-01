@@ -7,9 +7,6 @@
 # [*admin_password*]
 #   (Required) The new API password to set for the Gitlab root user.
 #
-# [*admin_email*]
-#   (Required) The email address to set for the Gitlab root user.
-#
 # [*download_url*]
 #   The download URL for Gitlab omnibus edition. Get the latest from
 #   https://about.gitlab.com/downloads/.
@@ -60,7 +57,6 @@
 
 class gitlab (
   $admin_password,
-  $admin_email,
   $download_url = $gitlab::params::download_url,
   $installer_file = $gitlab::params::installer_file,
   $installer_cmd = $gitlab::params::installer_cmd,
@@ -117,7 +113,6 @@ class gitlab (
   class { 'gitlab::config':
     gitlab_url           => $gitlab_url,
     admin_password       => $admin_password,
-    admin_email          => $admin_email,
     api_login            => $api_login,
     api_default_password => $api_default_password,
     add_root_pubkey      => $add_root_pubkey,

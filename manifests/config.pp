@@ -10,9 +10,6 @@
 # [*admin_password*]
 #   The new API password to set for the Gitlab root user.
 #
-# [*admin_email*]
-#   The email address to set for the Gitlab root user.
-#
 # [*api_login*]
 #   The admin user used to access the Gitlab API.
 #
@@ -36,7 +33,6 @@
 class gitlab::config (
   $gitlab_url,
   $admin_password,
-  $admin_email,
   $api_login,
   $api_default_password,
   $add_root_pubkey
@@ -62,14 +58,6 @@ class gitlab::config (
     login        => $api_login,
     password     => $api_default_password,
     new_password => $admin_password
-  }
-
-  # Change the root user email address.
-
-  gitlab_user { 'root':
-    ensure  => 'present',
-    session => 'initial-gitlab-config',
-    email   => $admin_email
   }
 
   if str2bool($add_root_pubkey) {
