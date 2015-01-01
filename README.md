@@ -81,8 +81,11 @@ The `key` value must be unbroken on a single line. It has been split up in the e
 
     gitlab_group { 'My Group':
       ensure  => 'present',
-      session => 'sessionname'
+      session => 'sessionname',
+      owner   => 'newusername'
     }
+
+The optional `owner` parameter makes sure that the specified user is a member of the group with owner privileges. Note that changing this value will not remove old owners.
 
 #### The `gitlab_project` type
 
@@ -94,7 +97,7 @@ The `gitlab_project` type creates a project:
       owner   => 'My Group'
     }
 
-The `owner` can be the name of a group or a user. If it is left out the project will be owned by the user that logged into the API.
+The `owner` can be the name of a group or a user. If the `owner` parameter is not specified the new project will be owned by the user that is logged into the API.
 
 #### The `gitlab_deploy_key` type
 
