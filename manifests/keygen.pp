@@ -26,7 +26,7 @@
 #
 
 define gitlab::keygen (
-  $homedir = "/home/${title}",
+  $homedir = "/home/${name}",
   $comment = "${name}@${::fqdn}",
   $type = 'rsa',
   $bits = '2048'
@@ -43,7 +43,7 @@ define gitlab::keygen (
 
   args = "-t ${type} -b ${bits} -N '' -C ${comment} -f \"${file}\""
 
-  exec { "keygen-${title}":
+  exec { "keygen-${name}":
     path    => [ '/bin', '/usr/bin' ],
     command => "ssh-keygen ${gitlab::keygen::args}",
     user    => $title,
