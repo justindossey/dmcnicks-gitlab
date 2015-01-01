@@ -28,14 +28,16 @@ The `gitlab` Puppet module installs and configures Omnibus Gitlab and provides c
 
 ### Defined Types
 
-**Cautionary note: any resources created inside Gitlab by these types will be managed solely by Puppet. The created projects, groups, users and so on will not be able to be changed or deleted through the Gitlab user interface.**
+**Cautionary note: any resources created by these custom types should be managed solely by Puppet. Changes made to projects, groups, users etc created by Puppet inside Gitlab itself will be lost the next time the Puppet agent runs.**
 
-All of the defined types use the Gitlab REST API and require the `rest-client` ruby gem installed:
+All of the defined types use the Gitlab REST API and require the `rest-client` ruby gem to be installed:
 
     package { 'rest-client':
       ensure   => 'present',
       provider => 'gem'
     }
+
+This package is required by the `gitlab` module so it will be installed. However, it will not be available to the custom types on the first Puppet agent run, since custom types are loaded before package declarations are processed.
 
 #### The `gitlab_session` type
 
@@ -50,6 +52,8 @@ The `gitlab_session` type logs into the Gitlab API and stores a returned token s
 The `login` parameter can be any user that has administrative privileges on the Gitlab site. The `url` should be the top-level URL of the site.
 
 The name of the session is used to form dependencies between any other of the type declarations and the session declaration. Every other type declaration will include a `session` parameter for this purpose.
+
+Note that this type does not require an `ensure` parameter because it does not change any resources itself.
 
 #### The `gitlab_user` type
 
