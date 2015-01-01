@@ -49,7 +49,7 @@ class gitlab::install (
 
     file { $ssl_cert_dir:
       ensure => 'directory'
-    } ->
+    }
 
     openssl::certificate::x509 { $::fqdn:
         ensure       => 'present',
@@ -59,8 +59,9 @@ class gitlab::install (
         days         => '3650',
         force        => false,
         cnf_tpl      => 'openssl/cert.cnf.erb',
+        notify       => Exec['gitlab-postinstall'],
         base_dir     => $ssl_cert_dir,
-        notify       => Exec['gitlab-postinstall']
+        require      => File[$ssl_cert_dir]
     }
   }
 
@@ -72,8 +73,9 @@ class gitlab::install (
     path    => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
     command => "wget ${download_url} -O ${installer_path}",
     timeout => '900',
-    creates => $installer_path
-  } ~>
+    creates => $installer_path,
+    notify  => Exec['gitlab-install']
+  }
 
   # Run the installer if the contents of the installer file have changed.
 

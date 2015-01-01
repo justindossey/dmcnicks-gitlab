@@ -75,7 +75,7 @@ class gitlab (
     worker_processes => $worker_processes,
     gitlab_url       => $gitlab_url,
     ssl              => $ssl
-  } ->
+  }
 
   # Configure Gitlab.
 
@@ -83,6 +83,7 @@ class gitlab (
     gitlab_url   => $gitlab_url,
     api_login    => $api_login,
     api_password => $api_password,
-    new_password => $new_password
+    new_password => $new_password,
+    require      => Class['gitlab::install']
   }
 }
