@@ -83,11 +83,13 @@ class gitlab (
   }
 
   $port_string = str2bool($ssl) ? {
-    true => $ssl_port != "443" ? {
-      true => ":${ssl_port}"
+    true => $ssl_port ? {
+      "443"   => '',
+      default => ":${ssl_port}"
     }
-    false => $port != "80" ? {
-      true =>":${port}"
+    false => $port ? {
+      "80"    => '',
+      default => ":${port}"
     }
   }
 
