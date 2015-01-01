@@ -1,4 +1,5 @@
 require 'puppet/provider/gitlab'
+require 'pp'
 
 Puppet::Type.type(:gitlab_group).provide(
   :ruby,
@@ -159,14 +160,49 @@ Puppet::Type.type(:gitlab_group).provide(
 
   def self.add_owner(user, group_id)
 
-    owner_id = user_id_for(user)
+    # First check what access the user has in the group.
+
+    access_level = get_access_level(user, group_id)
+
+    # Return just now if the user is already an owner.
+
+    return if access_level == 50
+
+    # If the user is a member but does not have owner privileges, temporarily
+    # remove the user from the group, so that they can be re-added as an owner
+    # below.
+
+    user_id = user_id_for(user)
+
+    if access_level > 0
+      api_delete('/groups/%s/members/%s' % [ group_id, user_id ])
+    end
+
+    # Add the user as a member with owner rights.
 
     params = {
-      :user_id      => owner_id,
+      :user_id      => user_id,
       :access_level => 50
     }
 
     api_post('/groups/%s/members' % group_id, params)
+
+  end
+
+  # returns the access level of the user for the given group, or zero if the
+  # user is not a member.
+ 
+  def self.get_access_level(name, group_id)
+
+    members = api_get('/groups/%s/members' % group_id)
+
+    members.each do |member|
+      if member['username'] == name
+        return member['access_level']
+      end
+    end
+
+    return 0
 
   end
 
