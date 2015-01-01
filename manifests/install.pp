@@ -115,7 +115,7 @@ class gitlab::install (
 
   exec { 'gitlab-restart':
     path    => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
-    command => 'gitlab-ctl restart && sleep 10',
+    command => 'gitlab-ctl restart && sleep 30',
     refreshonly => true
   }
 
