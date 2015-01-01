@@ -49,8 +49,7 @@ class gitlab::install (
     path    => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
     command => "wget ${download_url} -O ${installer_path}",
     timeout => '900',
-    creates => $installer_path,
-    notify  => Exec['gitlab-install']
+    creates => $installer_path
   }
 
   # Run the installer if the contents of the installer file have changed.
@@ -61,7 +60,6 @@ class gitlab::install (
     path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
     command     => "${installer_cmd} ${installer_path}",
     creates     => $gitlab_etc_dir,
-    refreshonly => true,
     require     => Exec['gitlab-download']
   }
 
