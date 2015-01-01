@@ -18,9 +18,9 @@ Puppet::Type.type(:gitlab_group).provide(
     end
   end  
 
-  # Store the group ID and name as instance variables.
+  # Store the parameters as instance variables.
 
-  attr_accessor :group_id, :group_name
+  attr_accessor :group_id, :group_name, :group_owner
 
   # Create a new gitlab_group provider.
 
@@ -71,13 +71,22 @@ Puppet::Type.type(:gitlab_group).provide(
         # :present.
 
         properties = {
-          :ensure   => :present
+          :ensure => :present
         }
 
         resource.provider = new(properties)
 
         resource.provider.group_id = foundgroup['id']
         resource.provider.group_name = foundgroup['name']
+
+        # The owner parameter is a bit weird because there can be any
+        # number of group members with owner rights. For this reason we just
+        # check that the owner, if set, is actually a member that has owner
+        # rights.
+
+        if resource[:owner]
+          add_owner(resource[:owner], foundgroup['id'])
+        end
 
       else
 
@@ -86,6 +95,11 @@ Puppet::Type.type(:gitlab_group).provide(
         resource.provider = new(:ensure => :absent)
 
         resource.provider.group_name = name
+        resource.provider.group_owner = resource[:owner]
+
+        # Because the group does not exist we cannot deal with the group owner
+        # yet. It will be handled in the flush method after the group has been
+        # created.
 
       end
 
@@ -128,13 +142,36 @@ Puppet::Type.type(:gitlab_group).provide(
 
         api_post('/groups', params)
 
-        # Groups do not have any modifiable properties so there is no third
-        # option of modifying an existing resource here.
+        # Add the owner as a member with owner rights.
+ 
+        if group_owner
+          group_id = group_id_for(group_name)
+          add_owner(group_owner, group_id)
+        end
 
       end
 
     end
 
+  end
+
+  # Adds the given user as a group member with owner rights.
+
+  def self.add_owner(user, group_id)
+
+    owner_id = user_id_for(user)
+
+    params = {
+      :user_id      => owner_id,
+      :access_level => 50
+    }
+
+    api_post('/groups/%s/members' % group_id, params)
+
+  end
+
+  def add_owner(user, group_id)
+    self.class.add_owner(user, group_id)
   end
 
 end

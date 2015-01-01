@@ -24,6 +24,15 @@ Puppet::Type.newtype(:gitlab_group) do
     end
   end
 
+  newparam(:owner) do
+    desc 'A user that should be a member of the group with owner rights'
+    validate do |value|
+      unless value =~ /^[a-z0-9]+$/
+        raise ArgumentError , "%s is not a valid owner username" % value
+      end
+    end
+  end
+
   # Validation.
 
   validate do
