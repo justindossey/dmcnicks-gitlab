@@ -1,0 +1,15 @@
+#!/bin/sh
+
+BASE=`dirname $0`
+HIERA_CONFIG=/tmp/hiera.config
+
+cat > $HIERA_CONFIG <<HIERA
+---
+:backends: yaml
+:yaml:
+  :datadir: $BASE/hiera
+  :hierarchy:
+    - common
+HIERA
+
+puppet apply --modulepath $BASE/modules --hiera_config $HIERA_CONFIG $*
