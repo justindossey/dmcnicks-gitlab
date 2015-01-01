@@ -79,12 +79,16 @@ Puppet::Type.type(:gitlab_project).provide(
         resource.provider.project_id = foundproject['id']
         resource.provider.project_name = foundproject['name']
 
-        if owner = foundproject['owner']['name']
-          resource.provider.owner = owner
+        if foundproject['owner']
+          if owner = foundproject['owner']['name']
+            resource.provider.owner = owner
+          end
         end
 
-        if namespace = foundproject['namespace']['name']
-          resource.provider.owner = namespace
+        if foundproject['namespace']
+          if namespace = foundproject['namespace']['name']
+            resource.provider.owner = namespace
+          end
         end
 
       else
