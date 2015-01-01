@@ -62,7 +62,9 @@ class gitlab::config (
 
   if str2bool($add_root_pubkey) {
 
-    # Generate a public key for the root user if necessary.
+    # Generate a public key for the root user if necessary. Note that if the
+    # key has to be generated it will not be available to puppet through the
+    # gitlab_root_rsapubkey fact until the next Puppet agent run.
 
     gitlab::keygen { 'root':
       homedir => '/root'
