@@ -20,6 +20,12 @@
 # [*gitlab_url*]
 #   The eventual URL of Gitlab.
 #
+# [*port*]
+#   The HTTP port that Gitlab will listen on.
+#
+# [*ssl_port*]
+#   The SSL port that Gitlab will listen on.
+#
 # [*ssl*]
 #   True if SSL should be enabled.
 #
@@ -38,31 +44,10 @@ class gitlab::install (
   $installer_cmd,
   $worker_processes,
   $gitlab_url,
+  $port,
+  $ssl_port,
   $ssl
 ) {
-
-  # Create a certificate if SSL is enabled.
-
-  if str2bool($ssl) {
-
-    $ssl_cert_dir = '/etc/gitlab/ssl'
-
-    file { $ssl_cert_dir:
-      ensure => 'directory'
-    } ->
-
-    openssl::certificate::x509 { $::fqdn:
-        ensure       => 'present',
-        country      => 'UK',
-        organization => 'Gitlab',
-        commonname   => $::fqdn,
-        days         => '3650',
-        force        => false,
-        cnf_tpl      => 'openssl/cert.cnf.erb',
-        base_dir     => $ssl_cert_dir,
-        notify       => Exec['gitlab-postinstall']
-    }
-  }
 
   # Download the installer file if it does not exist on the file system
   # already. This may take some time so timeout has been increased to 
@@ -73,15 +58,17 @@ class gitlab::install (
     command => "wget ${download_url} -O ${installer_path}",
     timeout => '900',
     creates => $installer_path
-  } ~>
+  }
 
   # Run the installer if the contents of the installer file have changed.
 
+  $gitlab_etc_dir = '/etc/gitlab'
+
   exec { 'gitlab-install':
-    path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
-    command     => "${installer_cmd} ${installer_path}",
-    refreshonly => true,
-    notify      => Exec['gitlab-postinstall']
+    path    => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
+    command => "${installer_cmd} ${installer_path}",
+    creates => $gitlab_etc_dir,
+    require => Exec['gitlab-download']
   }
 
   # Create the gitlab.rb file.
@@ -90,14 +77,52 @@ class gitlab::install (
     ensure  => 'present',
     content => template('gitlab/gitlab.rb.erb'),
     mode    => '0600',
+    require => Exec['gitlab-install'],
     notify  => Exec['gitlab-postinstall']
   }
 
+  # Create a certificate if SSL is enabled.
+
+  if str2bool($ssl) {
+
+    $gitlab_ssl_dir = "${gitlab_etc_dir}/ssl"
+
+    file { $gitlab_ssl_dir:
+      ensure  => 'directory',
+      require => Exec['gitlab-install']
+    }
+
+    openssl::certificate::x509 { $::fqdn:
+        ensure       => 'present',
+        country      => 'UK',
+        organization => 'Gitlab',
+        commonname   => $::fqdn,
+        days         => '3650',
+        force        => false,
+        cnf_tpl      => 'openssl/cert.cnf.erb',
+        base_dir     => $gitlab_ssl_dir,
+        require      => File[$gitlab_ssl_dir],
+        notify       => Exec['gitlab-postinstall']
+    }
+  }
   # Run the post-install configuration if the installer has been run.
 
   exec { 'gitlab-postinstall':
     path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
     command     => 'gitlab-ctl reconfigure',
+    refreshonly => true,
+    require     => Exec['gitlab-install'],
+    notify      => Exec['gitlab-restart']
+  }
+
+  # Restart after post-install. Sleep for a short while afterwards so that
+  # Gitlab services are sure to be fully up before any further configuration
+  # takes place.
+
+  exec { 'gitlab-restart':
+    path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
+    command     => 'gitlab-ctl restart && sleep 30',
     refreshonly => true
   }
+
 }

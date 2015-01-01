@@ -1,6 +1,6 @@
 external_url '<%= @gitlab_url %>'
 nginx['redirect_http_to_https'] = <%= @ssl %>
-nginx['redirect_http_to_https_port'] = 80
+nginx['redirect_http_to_https_port'] = <%= @port %>
 nginx['ssl_certificate'] = "/etc/gitlab/ssl/<%= @fqdn %>.crt"
 nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/<%= @fqdn %>.key"
 unicorn['worker_processes'] = <%= @worker_processes %>
