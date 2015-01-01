@@ -91,10 +91,10 @@ class gitlab (
 
   class { 'gitlab::config':
     gitlab_url           => $gitlab_url,
-    api_login            => $api_login 
-    api_default_password => $api_default_password,
     admin_password       => $admin_password,
     admin_email          => $admin_email,
+    api_login            => $api_login,
+    api_default_password => $api_default_password,
     add_root_pubkey      => $add_root_pubkey,
     require              => Class['gitlab::install']
   }
