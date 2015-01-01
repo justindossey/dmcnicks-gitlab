@@ -20,6 +20,12 @@
 # [*gitlab_url*]
 #   The eventual URL of Gitlab.
 #
+# [*port*]
+#   The HTTP port that Gitlab will listen on.
+#
+# [*ssl_port*]
+#   The SSL port that Gitlab will listen on.
+#
 # [*ssl*]
 #   True if SSL should be enabled.
 #
@@ -38,6 +44,8 @@ class gitlab::install (
   $installer_cmd,
   $worker_processes,
   $gitlab_url,
+  $port,
+  $ssl_port,
   $ssl
 ) {
 
@@ -54,13 +62,13 @@ class gitlab::install (
 
   # Run the installer if the contents of the installer file have changed.
 
-  $gitlab_etc_dir = "/etc/gitlab"
+  $gitlab_etc_dir = '/etc/gitlab'
 
   exec { 'gitlab-install':
-    path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
-    command     => "${installer_cmd} ${installer_path}",
-    creates     => $gitlab_etc_dir,
-    require     => Exec['gitlab-download']
+    path    => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
+    command => "${installer_cmd} ${installer_path}",
+    creates => $gitlab_etc_dir,
+    require => Exec['gitlab-download']
   }
 
   # Create the gitlab.rb file.
@@ -112,8 +120,8 @@ class gitlab::install (
   # takes place.
 
   exec { 'gitlab-restart':
-    path    => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
-    command => 'gitlab-ctl restart && sleep 30',
+    path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
+    command     => 'gitlab-ctl restart && sleep 30',
     refreshonly => true
   }
 
