@@ -34,7 +34,7 @@ define gitlab::keygen (
 
   $ssh_dir = "${homedir}/.ssh"
   $file = "${ssh_dir}/id_${type}"
-  $args = "-t ${type} -b ${bits} -N '' -C ${comment} -f '${file}'"
+  $args = "-t ${type} -b ${bits} -N '' -C ${comment} -f ${file}"
 
   file { $ssh_dir:
     ensure => 'directory',
