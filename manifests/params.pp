@@ -13,15 +13,6 @@
 
 class gitlab::params () {
 
-  $ssl = false
-
-  $worker_processes = 1
-
-  $api_login = 'root'
-  $api_password = '5iveL!fe'
-
-  $installer_dir = '/srv'
-
   $installer_file = $::operatingsystem ? {
     'Debian' => "gitlab-debian${::operatingsystemmajrelease}.deb",
     'Ubuntu' => "gitlab-ubuntu${::operatingsystemmajrelease}.deb",
@@ -32,8 +23,6 @@ class gitlab::params () {
     'Debian' => 'dpkg -i',
     'RedHat' => 'rpm -ihv'
   }
-
-  # Make a guess at the download URL.
 
   $download_url = $::osfamily ? {
     'Debian' => $::operatingsystem ? {

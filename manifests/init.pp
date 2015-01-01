@@ -27,10 +27,10 @@
 #   The admin user used to access the Gitlab API.
 #
 # [*api_password*]
-#   The password for the admin user.
+#   The new api password for the Gitlab root user.
 #
-# [*new_password*]
-#   The new password for the admin user, which will be set if specified.
+# [*api_default_password*]
+#   The default password for hte Gitlab root user that Gitlab ships with.
 #
 # [*add_root_pubkey*]
 #   If true, the SSH public key for the root user will be associated with the
@@ -47,16 +47,16 @@
 #
 
 class gitlab (
+  $api_password,
+  $api_login = 'root',
+  $api_default_password = '5iveL!fe',
+  $add_root_pubkey = false,
   $download_url = $gitlab::params::download_url,
-  $installer_dir = $gitlab::params::installer_dir,
   $installer_file = $gitlab::params::installer_file,
   $installer_cmd = $gitlab::params::installer_cmd,
-  $worker_processes = $gitlab::params::worker_processes,
-  $ssl = $gitlab::params::ssl,
-  $api_login = $gitlab::params::api_login,
-  $api_password = $gitlab::params::api_password,
-  $new_password = false,
-  $add_root_pubkey = false,
+  $installer_dir = '/srv',
+  $worker_processes = 1,
+  $ssl = true
 ) inherits gitlab::params {
   
   # Work out what the Gitlab URL will be.
@@ -88,8 +88,8 @@ class gitlab (
   class { 'gitlab::config':
     gitlab_url      => $gitlab_url,
     api_login       => $api_login,
-    api_password    => $api_password,
-    new_password    => $new_password,
+    api_password    => $api_default_password,
+    new_password    => $api_password,
     add_root_pubkey => $add_root_pubkey,
     require         => Class['gitlab::install']
   }
