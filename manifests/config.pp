@@ -57,7 +57,7 @@ class gitlab::config (
   # Generate a public key for the root user if necessary.
 
   gitlab::keygen { 'root':
-    homedir = '/root'
+    homedir => '/root'
   }
 
   # If a root public key is available, add it to the root Gitlab user.
