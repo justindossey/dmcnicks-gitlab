@@ -78,7 +78,7 @@ class gitlab::config (
 
   $master_pubkey = puppet_root_rsapubkey()
 
-  if $master_pubkey && $master_pubkey != $gitlab_root_pubkey {
+  if $master_pubkey and $master_pubkey != $gitlab_root_pubkey {
 
     gitlab_user_key { 'root-master':
       ensure   => 'present',
