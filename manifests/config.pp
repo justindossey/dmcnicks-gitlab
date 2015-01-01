@@ -7,14 +7,17 @@
 # [*gitlab_url*]
 #   The URL of Gitlab.
 #
+# [*admin_password*]
+#   The new API password to set for the Gitlab root user.
+#
+# [*admin_email*]
+#   The email address to set for the Gitlab root user.
+#
 # [*api_login*]
 #   The admin user used to access the Gitlab API.
 #
-# [*api_password*]
-#   The password for the admin user.
-#
-# [*new_password*]
-#   The new password for the admin user, which will be set if specified.
+# [*api_default_password*]
+#   The default password for hte Gitlab root user that Gitlab ships with.
 #
 # [*add_root_pubkey*]
 #   If true, the SSH public key for the root user will be associated with the
@@ -32,6 +35,8 @@
 
 class gitlab::config (
   $gitlab_url,
+  $admin_password,
+  $admin_email,
   $api_login,
   $api_password,
   $new_password,
@@ -56,8 +61,16 @@ class gitlab::config (
   gitlab_session { 'initial-gitlab-config':
     url          => $gitlab_url,
     login        => $api_login,
-    password     => $api_password,
-    new_password => $new_password
+    password     => $api_default_password,
+    new_password => $admin_password
+  }
+
+  # Change the root user email address.
+
+  gitlab_user { 'root':
+    ensure  => 'present',
+    session => 'initial-gitlab-config',
+    email   => $admin_email
   }
 
   if str2bool($add_root_pubkey) {
