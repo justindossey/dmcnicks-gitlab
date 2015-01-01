@@ -86,7 +86,7 @@ class gitlab (
     true => $ssl_port ? {
       "443"   => '',
       default => ":${ssl_port}"
-    }
+    },
     false => $port ? {
       "80"    => '',
       default => ":${port}"
