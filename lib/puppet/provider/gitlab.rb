@@ -1,4 +1,5 @@
 require 'json'
+require 'pp'
 
 class Puppet::Provider::Gitlab < Puppet::Provider
 
@@ -255,7 +256,7 @@ class Puppet::Provider::Gitlab < Puppet::Provider
 
     groups.each do |group|
       if group['name'] == name
-        return group['id']
+        return group['id'].to_s
       end
     end
 
@@ -273,7 +274,7 @@ class Puppet::Provider::Gitlab < Puppet::Provider
 
     users.each do |user|
       if user['username'] == name
-        return user['id']
+        return user['id'].to_s
       end
     end
 
@@ -291,7 +292,7 @@ class Puppet::Provider::Gitlab < Puppet::Provider
 
     projects.each do |project|
       if project['projectname'] == name
-        return project['id']
+        return project['id'].to_s
       end
     end
 
