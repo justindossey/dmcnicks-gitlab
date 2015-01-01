@@ -60,16 +60,15 @@ class gitlab::config (
     homedir => '/root'
   }
 
-  notify { "pubkey is '${gitlab_root_pubkey}'": }
-
   # If a root public key is available, add it to the root Gitlab user.
 
-  if $gitlab_root_pubkey {
+  if $gitlab_root_rsapubkey {
 
     gitlab_user_key { "root-${fqdn}":
-      ensure => 'present',
-      session => 'initial-gitlab-config',
-      key     => $gitlab_root_pubkey
+      ensure   => 'present',
+      session  => 'initial-gitlab-config',
+      username => 'root',
+      key      => $gitlab_root_rsapubkey
     }
   }
 }
