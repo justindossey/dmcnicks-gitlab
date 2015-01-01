@@ -24,19 +24,23 @@ class gitlab::params () {
     'RedHat' => 'rpm -ihv'
   }
 
+  $base = 'https://downloads-packages.s3.amazonaws.com'
+  $major = '7.6.2'
+  $minor = 'omnibus.5.3.0.ci.1-1'
+
   $download_url = $::osfamily ? {
     'Debian' => $::operatingsystem ? {
       'Debian' => $::lsbmajdistrelease ? {
-        '7' => 'https://downloads-packages.s3.amazonaws.com/debian-7.7/gitlab_7.6.1-omnibus.5.3.0.ci.1-1_amd64.deb'
+        '7' => "${base}/debian-7.7/gitlab_${major}-${minor}_amd64.deb"
       },
       'Ubuntu' => $::lsbmajdistrelease ? {
-        '12' => 'https://downloads-packages.s3.amazonaws.com/ubuntu-12.04/gitlab_7.6.1-omnibus.5.3.0.ci.1-1_amd64.deb',
-        '14' => 'https://downloads-packages.s3.amazonaws.com/ubuntu-14.04/gitlab_7.6.1-omnibus.5.3.0.ci.1-1_amd64.deb'
+        '12' => "${base}/ubuntu-12.04/gitlab_${major}-${minor}_amd64.deb",
+        '14' => "${base}/ubuntu-14.04/gitlab_${major}-${minor}_amd64.deb"
       }
     },
     'RedHat' => $::operatingsystemmajrelease ? {
-      '6' => 'https://downloads-packages.s3.amazonaws.com/centos-6.6/gitlab-7.6.1_omnibus.5.3.0.ci.1-1.el6.x86_64.rpm',
-      '7' => 'https://downloads-packages.s3.amazonaws.com/centos-7.0.1406/gitlab-7.6.1_omnibus.5.3.0.ci.1-1.el7.x86_64.rpm'
+      '6' => "${base}/centos-6.6/gitlab-${major}_${minor}.el6.x86_64.rpm",
+      '7' => "${base}/centos-7.0.1406/gitlab-${major}_${minor}.el7.x86_64.rpm"
     }
   }
 }
