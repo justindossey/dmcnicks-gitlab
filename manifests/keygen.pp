@@ -33,8 +33,6 @@ define gitlab::keygen (
 ) {
 
   $ssh_dir = "${homedir}/.ssh"
-  $file = "${ssh_dir}/id_${type}"
-  $args = "-t ${type} -b ${bits} -N '' -C ${comment} -f ${file}"
 
   file { $ssh_dir:
     ensure => 'directory',
@@ -42,9 +40,16 @@ define gitlab::keygen (
     mode   => '0600'
   }
 
+  # I have no idea why the file has to be quoted like it is. If I change
+  # the quotes to single quotes or leave them out, ssh-keygen prompts for a
+  # file location when the exec runs. 
+
+  $args = "-t ${type} -b ${bits} -N '' -C ${comment}"
+  $file = "${ssh_dir}/id_${type}"
+
   exec { "keygen-${title}":
     path    => [ '/bin', '/usr/bin' ],
-    command => "ssh-keygen ${gitlab::keygen::args}",
+    command => "ssh-keygen ${args} -f \"${file}\"",
     user    => $title,
     creates => $file,
     require => File[$ssh_dir]
