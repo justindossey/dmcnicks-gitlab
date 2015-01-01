@@ -61,7 +61,8 @@ class gitlab::install (
         force        => false,
         cnf_tpl      => 'openssl/cert.cnf.erb',
         base_dir     => $ssl_cert_dir,
-        require      => File[$ssl_cert_dir]
+        require      => File[$ssl_cert_dir],
+        notify       => Exec['gitlab-postinstall']
     }
   }
 
@@ -90,7 +91,8 @@ class gitlab::install (
     ensure  => 'present',
     content => template('gitlab/gitlab.rb.erb'),
     mode    => '0600',
-    require => Exec['gitlab-install']
+    require => Exec['gitlab-install'],
+    notify  => Exec['gitlab-postinstall']
   }
 
   # Run the post-install configuration if the installer has been run.
@@ -98,6 +100,7 @@ class gitlab::install (
   exec { 'gitlab-postinstall':
     path    => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
     command => 'gitlab-ctl reconfigure',
+    refreshonly => true,
     require => File['/etc/gitlab/gitlab.rb']
   }
 }
