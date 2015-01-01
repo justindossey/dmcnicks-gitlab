@@ -34,14 +34,13 @@ define gitlab::keygen (
 
   $ssh_dir = "${homedir}/.ssh"
   $file = "${ssh_dir}/id_${type}"
+  $args = "-t ${type} -b ${bits} -N '' -C ${comment} -f \"${file}\""
 
   file { $ssh_dir:
     ensure => 'directory',
     owner  => $title,
     mode   => '0600'
   }
-
-  args = "-t ${type} -b ${bits} -N '' -C ${comment} -f \"${file}\""
 
   exec { "keygen-${name}":
     path    => [ '/bin', '/usr/bin' ],
