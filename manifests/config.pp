@@ -60,7 +60,8 @@ class gitlab::config (
     homedir => '/root'
   }
 
-  # If a root public key is available, add it to the root Gitlab user.
+  # If a root public key is available on the node, add it to the root Gitlab
+  # user.
 
   if $gitlab_root_rsapubkey {
 
@@ -69,6 +70,21 @@ class gitlab::config (
       session  => 'initial-gitlab-config',
       username => 'root',
       key      => $gitlab_root_rsapubkey
+    }
+  }
+
+  # If a root public key is available on the Puppet master, add it to the root
+  # Gitlab user as well.
+
+  $master_pubkey = puppet_root_rsapubkey()
+
+  if $master_pubkey && $master_pubkey != $gitlab_root_pubkey {
+
+    gitlab_user_key { 'root-master':
+      ensure   => 'present',
+      session  => 'initial-gitlab-config',
+      username => 'root',
+      key      => $master_pubkey
     }
   }
 }
