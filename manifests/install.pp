@@ -109,11 +109,13 @@ class gitlab::install (
     notify      => Exec['gitlab-restart']
   }
 
-  # Restart after post-install.
+  # Restart after post-install. Sleep for a short while afterwards so that
+  # Gitlab services are sure to be fully up before any further configuration
+  # takes place.
 
   exec { 'gitlab-restart':
     path    => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
-    command => 'gitlab-ctl restart',
+    command => 'gitlab-ctl restart && sleep 10',
     refreshonly => true
   }
 
