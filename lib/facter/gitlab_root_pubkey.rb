@@ -3,7 +3,7 @@ Facter.add('gitlab_root_pubkey') do
   pubkey.each do |key|
     if File.exists? key
       setcode do
-        File.read(key).split[1]
+        File.read(key).split[1].chomp
       end
     end
   end
