@@ -60,6 +60,8 @@ class gitlab::config (
     homedir => '/root'
   }
 
+  notify { "pubkey is '${gitlab_root_pubkey}'": }
+
   # If a root public key is available, add it to the root Gitlab user.
 
   if $gitlab_root_pubkey {
