@@ -59,9 +59,9 @@ class gitlab::install (
         days         => '3650',
         force        => false,
         cnf_tpl      => 'openssl/cert.cnf.erb',
-        notify       => Exec['gitlab-postinstall'],
         base_dir     => $ssl_cert_dir,
-        require      => [ File[$ssl_cert_dir], Exec['gitlab-postinstall'] ]
+        require      => File[$ssl_cert_dir],
+        before       => Exec['gitlab-postinstall']
     }
   }
 
@@ -73,17 +73,15 @@ class gitlab::install (
     path    => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
     command => "wget ${download_url} -O ${installer_path}",
     timeout => '900',
-    creates => $installer_path,
-    notify  => Exec['gitlab-install']
+    creates => $installer_path
   }
 
   # Run the installer if the contents of the installer file have changed.
 
   exec { 'gitlab-install':
-    path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
-    command     => "${installer_cmd} ${installer_path}",
-    refreshonly => true,
-    notify      => Exec['gitlab-postinstall']
+    path    => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
+    command => "${installer_cmd} ${installer_path}",
+    require => Exec['gitlab-download']
   }
 
   # Create the gitlab.rb file.
@@ -92,15 +90,14 @@ class gitlab::install (
     ensure  => 'present',
     content => template('gitlab/gitlab.rb.erb'),
     mode    => '0600',
-    require => Exec['gitlab-install'],
-    notify  => Exec['gitlab-postinstall']
+    require => Exec['gitlab-install']
   }
 
   # Run the post-install configuration if the installer has been run.
 
   exec { 'gitlab-postinstall':
-    path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
-    command     => 'gitlab-ctl reconfigure',
-    refreshonly => true
+    path    => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
+    command => 'gitlab-ctl reconfigure',
+    require => File['/etc/gitlab/gitlab.rb']
   }
 }
