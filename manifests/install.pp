@@ -48,7 +48,8 @@ class gitlab::install (
     $ssl_cert_dir = '/etc/gitlab/ssl'
 
     file { $ssl_cert_dir:
-      ensure => 'directory'
+      ensure  => 'directory',
+      require => Exec['gitlab-install']
     }
 
     openssl::certificate::x509 { $::fqdn:
@@ -60,8 +61,7 @@ class gitlab::install (
         force        => false,
         cnf_tpl      => 'openssl/cert.cnf.erb',
         base_dir     => $ssl_cert_dir,
-        require      => File[$ssl_cert_dir],
-        before       => Exec['gitlab-postinstall']
+        require      => File[$ssl_cert_dir]
     }
   }
 
