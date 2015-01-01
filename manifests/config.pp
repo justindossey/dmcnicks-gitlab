@@ -38,8 +38,7 @@ class gitlab::config (
   $admin_password,
   $admin_email,
   $api_login,
-  $api_password,
-  $new_password,
+  $api_default_password,
   $add_root_pubkey
 ) {
 
