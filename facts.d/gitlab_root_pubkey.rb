@@ -1,10 +1,14 @@
-Facter.add('gitlab_root_pubkey') do
-  pubkey = [ '/root/.ssh/id_rsa.pub', '/root/.ssh/id_dsa.pub' ]
-  pubkey.each do |key|
-    if File.exists? key
-      setcode do
-        File.read(key).split[1]
-      end
-    end
-  end
-end
+#!/bin/sh
+
+PUBKEYS="id_rsa.pub id_dsa.pub"
+SSHDIR="/root/.ssh"
+
+for KEYFILE in $PUBKEYS
+do
+  if [ -f "$SSHDIR/$KEYFILE" ]
+  then
+    KEY=`cat $SSHDIR/$KEYFILE`
+    echo "gitlab_root_pubkey: $KEY"
+    exit
+  fi
+done
