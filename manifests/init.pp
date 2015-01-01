@@ -5,10 +5,10 @@
 # === Parameters
 #
 # [*admin_password*]
-#   The new API password to set for the Gitlab root user.
+#   (Required) The new API password to set for the Gitlab root user.
 #
 # [*admin_email*]
-#   The email address to set for the Gitlab root user.
+#   (Required) The email address to set for the Gitlab root user.
 #
 # [*download_url*]
 #   The download URL for Gitlab omnibus edition. Get the latest from
@@ -23,14 +23,23 @@
 # [*installer_dir*]
 #   The local path to the Gitlab omnibus install package file.
 #
-# [*worker_processes*]
-#   The number of worker processes that Gitlab should run.
+# [*site*]
+#   The name of the site that Gitlab will run on (defaults to $fqdn).
+#
+# [*port*]
+#   The HTTP port that Gitlab will listen on (defaults to 80).
+#
+# [*ssl_port*]
+#   The SSL port that Gitlab will listen on (defaults to 443).
 #
 # [*ssl*]
-#   True if SSL should be enabled.
+#   True if SSL should be enabled (defaults to true).
+#
+# [*worker_processes*]
+#   The number of worker processes that Gitlab should run (defaults to 1).
 #
 # [*api_login*]
-#   The admin user used to access the Gitlab API.
+#   The admin user used to access the Gitlab API (defaults to root).
 #
 # [*api_default_password*]
 #   The default password for hte Gitlab root user that Gitlab ships with.
@@ -38,7 +47,7 @@
 # [*add_root_pubkey*]
 #   If true, the SSH public key for the root user will be associated with the
 #   root user in Gitlab. If the root user does not have an SSH keypair, one
-#   will be generated.
+#   will be generated (defaults to false).
 #
 # === Authors
 #
@@ -56,8 +65,11 @@ class gitlab (
   $installer_file = $gitlab::params::installer_file,
   $installer_cmd = $gitlab::params::installer_cmd,
   $installer_dir = '/srv',
-  $worker_processes = 1,
+  $site = $::fqdn,
+  $port = 80,
+  $ssl_port = 443,
   $ssl = true,
+  $worker_processes = 1,
   $api_login = 'root',
   $api_default_password = '5iveL!fe',
   $add_root_pubkey = false
@@ -70,7 +82,16 @@ class gitlab (
     false => 'http'
   }
 
-  $gitlab_url = "${http_scheme}://${::fqdn}"
+  $port_string = str2bool($ssl) ? {
+    true  => $ssl_port != 443 ? {
+      true => ":${ssl_port}"
+    }
+    false => $port != 80 ? {
+      true =>":${port}"
+    }
+  }
+
+  $gitlab_url = "${http_scheme}://${site}${port_string}"
 
   # Work out where the installer should be downloaded to.
 
@@ -84,7 +105,9 @@ class gitlab (
     installer_cmd    => $installer_cmd,
     worker_processes => $worker_processes,
     gitlab_url       => $gitlab_url,
-    ssl              => $ssl
+    port             => $port,
+    ssl_port         => $ssl_port,
+    ssl              => $ssl,
   }
 
   # Configure Gitlab.
