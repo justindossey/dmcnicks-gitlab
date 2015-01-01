@@ -85,13 +85,13 @@ class gitlab::config (
     # If a root public key is available on the node, add it to the root Gitlab
     # user.
 
-    if $gitlab_root_rsapubkey {
+    if $::gitlab_root_rsapubkey {
 
-      gitlab_user_key { "root-${fqdn}":
+      gitlab_user_key { "root-${::fqdn}":
         ensure   => 'present',
         session  => 'initial-gitlab-config',
         username => 'root',
-        key      => $gitlab_root_rsapubkey
+        key      => $::gitlab_root_rsapubkey
       }
     }
   }
