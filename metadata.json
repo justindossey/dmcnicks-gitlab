@@ -1,6 +1,6 @@
 {
   "name": "dmcnicks-gitlab",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "dmcnicks",
   "summary": "Installs and configures Omnibus Gitlab and provides custom types for creating projects and users",
   "license": "Apache-2.0",
