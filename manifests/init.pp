@@ -1,6 +1,6 @@
 # == Class: gitlab
 #
-# Full description of class gitlab here.
+# Installs and configured Gitlab.
 #
 # === Parameters
 #
