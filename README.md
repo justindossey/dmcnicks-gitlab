@@ -43,7 +43,7 @@ The module should work on Ubuntu 12 (precise) and CentOS 6. It should also work 
 ## Dependencies
 
 * 
-Gitlab expects to be able to send verification emails to users so your node must be able to send emails. I use [Mandrill](http://mandrillapp.com/) for this because it is avoids having to deal with SMTP blacklists. I have a [Mandrill Puppet module](https://github.com/dmcnicks/dmcnicks-mandrill.git) that can configure a variety of mailers to use Mandrill.
+Gitlab expects to be able to send verification emails to users so your node must be able to send emails. I use [Mandrill](http://mandrillapp.com/) for this because it is avoids having to deal with SMTP blacklists. I have a [Mandrill Puppet module](https://forge.puppetlabs.com/dmcnicks/mandrill) that can configure a variety of mailers to use Mandrill.
 
 ## Usage
 
