@@ -16,7 +16,8 @@ class gitlab::params () {
   $installer_file = $::operatingsystem ? {
     'Debian' => "gitlab-debian${::operatingsystemmajrelease}.deb",
     'Ubuntu' => "gitlab-ubuntu${::operatingsystemmajrelease}.deb",
-    'CentOS' => "gitlab-centos${::operatingsystemmajrelease}.rpm"
+    'CentOS' => "gitlab-centos${::operatingsystemmajrelease}.rpm",
+    'RedHat' => "gitlab-centos${::operatingsystemmajrelease}.rpm"
   }
 
   $installer_cmd = $::osfamily ? {
